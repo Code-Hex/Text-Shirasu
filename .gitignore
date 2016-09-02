@@ -30,3 +30,4 @@ MYMETA.*
 
 /Text-MeCab-Easy-*
 .DS_Store
+cpanfile.snapshot
