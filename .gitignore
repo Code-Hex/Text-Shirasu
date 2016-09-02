@@ -29,3 +29,4 @@ cover_db/
 MYMETA.*
 
 /Text-MeCab-Easy-*
+.DS_Store
