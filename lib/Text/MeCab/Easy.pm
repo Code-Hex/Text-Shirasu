@@ -18,8 +18,19 @@ sub new {
     my %args = ref $_[0] eq 'HASH' ? %{$_[0]} : @_;
     return bless {
         mecab => Text::MeCab->new(%args),
+        ids      => [],
         surfaces => [],
-        features => []
+        features => [],
+        lengths  => [],
+        rlengths => [],
+        lcattr   => [],
+        stats    => [],
+        isbests  => [],
+        alpha    => [],
+        beta     => [],
+        probs    => [],
+        wcosts   => [],
+        costs    => [],
     }, $class;
 }
 
@@ -60,16 +71,22 @@ sub filter {
     return ($surfaces, $features);
 }
 
-sub dumper {
+sub print {
     my $self = shift;
 
     my $cnt = @{$self->{surfaces}};
 
     print "\n";
     for my $i (0 .. $cnt) {
-        printf "%s:\t%s\n", $self->{surfaces}->[$i], join ',', @{$self->{features}};
+        printf "%s:\t%s\n", $self->{surfaces}->[$i], join ',', @{$self->{features}->[$i]};
     }
     print "\n";
+}
+
+sub dumper {
+    my $self = shift;
+    local $Data::Dumper::Sortkeys = 1;
+
 }
 
 
