@@ -9,28 +9,15 @@ use Text::MeCab;
 
 our $VERSION = "0.01";
 
-sub mecab    { $_[0]->{mecab}    }
-sub surfaces { $_[0]->{surfaces} }
-sub features { $_[0]->{features} }
+sub mecab    { $_[0]->{mecab}  }
+sub surfaces { $_[0]->{parsed} }
 
 sub new {
     my $class = shift;
     my %args = ref $_[0] eq 'HASH' ? %{$_[0]} : @_;
     return bless {
-        mecab => Text::MeCab->new(%args),
-        ids      => [],
-        surfaces => [],
-        features => [],
-        lengths  => [],
-        rlengths => [],
-        lcattr   => [],
-        stats    => [],
-        isbests  => [],
-        alpha    => [],
-        beta     => [],
-        probs    => [],
-        wcosts   => [],
-        costs    => [],
+        mecab  => Text::MeCab->new(%args),
+        parsed => []
     }, $class;
 }
 
@@ -40,12 +27,24 @@ sub parse {
     my $mt = $self->{mecab};
 
     # initialize
-    $self->{surfaces} = [];
-    $self->{features} = [];
+    $self->{parsed} = [];
 
     for (my $node = $mt->parse($sentence); $node && $node->surface; $node = $node->next) {
-        push @{$self->{surfaces}}, $node->surface;
-        push @{$self->{features}}, [split /,/, $node->feature];
+        push @{$self->{parsed}}, {
+            id      => $node->id,
+            surface => $node->surface,
+            feature => [split /,/, $node->feature],
+            length  => $node->length,
+            rlength => $node->rlength,
+            lcattr  => $node->lcattr,
+            stat    => $node->stat,
+            isbest  => $node->isbest,
+            alpha   => $node->alpha,
+            beta    => $node->beta,
+            prob    => $node->prob,
+            wcost   => $node->wcost,
+            cost    => $node->cost,
+        };
     }
 
     return $self;
@@ -57,28 +56,15 @@ sub filter {
     # filter by part of speech
     my $judge = @_ > 1 ? join '|', map { encode_utf8($_) } @_ : encode_utf8(shift);
 
-    my $cnt = @{$self->{surfaces}};
-    my $surfaces = [];
-    my $features = [];
-
-    for my $i (0 .. $cnt) {
-        if ($self->{features}->[$i]->[0] =~ /$judge/) {
-            push @$surfaces, $self->{surfaces}->[$i];
-            push @$features, $self->{features}->[$i];
-        }
-    }
-
-    return ($surfaces, $features);
+    return [grep { $_->{feature}->[0] =~ /$judge/ } @{$self->{parsed}}];
 }
 
 sub print {
     my $self = shift;
 
-    my $cnt = @{$self->{surfaces}};
-
     print "\n";
-    for my $i (0 .. $cnt) {
-        printf "%s:\t%s\n", $self->{surfaces}->[$i], join ',', @{$self->{features}->[$i]};
+    for my $data (@{$self->{parsed}}) {
+        printf "%s:\t%s\n", $data->{surface}, join ',', @{$data->{feature}};
     }
     print "\n";
 }
@@ -86,7 +72,10 @@ sub print {
 sub dumper {
     my $self = shift;
     local $Data::Dumper::Sortkeys = 1;
+    local $Data::Dumper::Indent = 1;
+    my $dumper = Data::Dumper::Dumper($self->{parsed});
 
+    print $dumper;
 }
 
 
