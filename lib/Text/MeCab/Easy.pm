@@ -53,7 +53,7 @@ sub parse {
 
 sub filter {
     my $self = shift;
-    my %params = @_;
+    my %params = ref $_[0] eq 'HASH' ? %{$_[0]} : @_;
 
     # filter by part of speech
     my $judge = @{$params{part_of_speech}} > 1 ? join '|', map { encode_utf8($_) } @{$params{part_of_speech}}
