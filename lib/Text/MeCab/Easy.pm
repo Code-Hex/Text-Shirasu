@@ -2,6 +2,7 @@ package Text::MeCab::Easy;
 
 use strict;
 use warnings;
+use utf8;
 use v5.10;
 
 use Encode;
@@ -9,8 +10,8 @@ use Text::MeCab;
 
 our $VERSION = "0.01";
 
-sub mecab    { $_[0]->{mecab}  }
-sub surfaces { $_[0]->{parsed} }
+sub mecab  { $_[0]->{mecab}  }
+sub parsed { $_[0]->{parsed} }
 
 sub new {
     my $class = shift;
@@ -52,9 +53,11 @@ sub parse {
 
 sub filter {
     my $self = shift;
+    my %params = @_;
 
     # filter by part of speech
-    my $judge = @_ > 1 ? join '|', map { encode_utf8($_) } @_ : encode_utf8(shift);
+    my $judge = @{$params{part_of_speech}} > 1 ? join '|', map { encode_utf8($_) } @{$params{part_of_speech}}
+                    : encode_utf8(shift @{$params{part_of_speech}});
 
     return [grep { $_->{feature}->[0] =~ /$judge/ } @{$self->{parsed}}];
 }
