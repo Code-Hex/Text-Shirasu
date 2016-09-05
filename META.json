@@ -56,13 +56,13 @@
    "release_status" : "unstable",
    "resources" : {
       "bugtracker" : {
-         "web" : "https://github.com/Code-Hex/Text-MeCab-Soup/issues"
+         "web" : "https://github.com/Code-Hex/Text-MeCab-Easy/issues"
       },
-      "homepage" : "https://github.com/Code-Hex/Text-MeCab-Soup",
+      "homepage" : "https://github.com/Code-Hex/Text-MeCab-Easy",
       "repository" : {
          "type" : "git",
-         "url" : "git://github.com/Code-Hex/Text-MeCab-Soup.git",
-         "web" : "https://github.com/Code-Hex/Text-MeCab-Soup"
+         "url" : "git://github.com/Code-Hex/Text-MeCab-Easy.git",
+         "web" : "https://github.com/Code-Hex/Text-MeCab-Easy"
       }
    },
    "version" : "0.01",
