@@ -1,4 +1,4 @@
-name = "Text-MeCab-Easy"
+name = "Text-MeCab-Soup"
 # badges = ["travis"]
 module_maker="ModuleBuildTiny"
 

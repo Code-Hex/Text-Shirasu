@@ -1,4 +1,4 @@
-package Text::MeCab::Easy;
+package Text::MeCab::Soup;
 
 use strict;
 use warnings;
@@ -7,6 +7,7 @@ use utf8;
 use Carp;
 use Encode;
 use Text::MeCab;
+use Contextual::Return;
 
 our $VERSION = "0.01";
 
@@ -71,20 +72,23 @@ sub search {
     $self->{result} = [ 
         grep {
             $_->{feature}->[ FEATURE_TABLE->{type} ] =~ /($judge)/
-            and _sub_query($_->{feature}->[1], \%params, decode_utf8($1))
+            and _sub_query($_->{feature}->[1], $params{decode_utf8($1)})
         } @{$self->{result}}
     ];
 
-    return wantarray ? @{$self->{result}} : $self;
+    return 
+        OBJREF  { $self }
+        DEFAULT { $self->{result} };
 }
 
 sub _sub_query {
-    my ($subtype, $params, $key) = @_;
-    return 1 unless ref $params->{$key} eq 'ARRAY';
+    my ($subtype, $query) = @_;
 
-    my $judge = @{$params->{$key}} > 1 ?
-                join '|', map { encode_utf8($_) } @{$params->{$key}}
-                : encode_utf8(shift @{$params->{$key}});
+    return 1 unless ref $query eq 'ARRAY';
+
+    my $judge = @{$query} > 1 ?
+                join '|', map { encode_utf8($_) } @{$query}
+                : encode_utf8(shift @{$query});
     
     return $subtype =~ /$judge/;
 }
@@ -120,13 +124,13 @@ __END__
 
 =head1 NAME
 
-Text::MeCab::Easy - It's new $module
+Text::MeCab::Soup - It's new $module
 
 =head1 SYNOPSIS
 
     use Data::Dumper;
-    use Text::MeCab::Easy;
-    my $mt = Text::MeCab::Easy->new;
+    use Text::MeCab::Soup;
+    my $mt = Text::MeCab::Soup->new;
     $mt->parse("昨日の晩御飯は鮭のふりかけと味噌汁だけでした。");
 
     my $filtered = $mt->filter(type => [qw/名詞 助動詞/]);
@@ -134,7 +138,7 @@ Text::MeCab::Easy - It's new $module
 
 =head1 DESCRIPTION
 
-Text::MeCab::Easy is ...
+Text::MeCab::Soup is ...
 
 =head1 LICENSE
 

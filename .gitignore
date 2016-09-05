@@ -28,6 +28,6 @@ cover_db/
 
 MYMETA.*
 
-/Text-MeCab-Easy-*
+/Text-MeCab-Soup-*
 .DS_Store
 cpanfile.snapshot

@@ -6,9 +6,9 @@ use utf8;
 use FindBin;
 BEGIN { push @INC, "$FindBin::Bin/lib"; };
 
-use Text::MeCab::Easy;
+use Text::MeCab::Soup;
 
-my $mt = Text::MeCab::Easy->new;
+my $mt = Text::MeCab::Soup->new;
 $mt->parse("昨日の晩御飯は鮭のふりかけと味噌汁だけでした。");
 #$mt->print;
 

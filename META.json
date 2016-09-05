@@ -12,7 +12,7 @@
       "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
       "version" : "2"
    },
-   "name" : "Text-MeCab-Easy",
+   "name" : "Text-MeCab-Soup",
    "no_index" : {
       "directory" : [
          "t",
@@ -56,13 +56,13 @@
    "release_status" : "unstable",
    "resources" : {
       "bugtracker" : {
-         "web" : "https://github.com/Code-Hex/Text-MeCab-Easy/issues"
+         "web" : "https://github.com/Code-Hex/Text-MeCab-Soup/issues"
       },
-      "homepage" : "https://github.com/Code-Hex/Text-MeCab-Easy",
+      "homepage" : "https://github.com/Code-Hex/Text-MeCab-Soup",
       "repository" : {
          "type" : "git",
-         "url" : "git://github.com/Code-Hex/Text-MeCab-Easy.git",
-         "web" : "https://github.com/Code-Hex/Text-MeCab-Easy"
+         "url" : "git://github.com/Code-Hex/Text-MeCab-Soup.git",
+         "web" : "https://github.com/Code-Hex/Text-MeCab-Soup"
       }
    },
    "version" : "0.01",
