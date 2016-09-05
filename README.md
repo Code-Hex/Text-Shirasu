@@ -4,7 +4,13 @@ Text::MeCab::Easy - It's new $module
 
 # SYNOPSIS
 
+    use Data::Dumper;
     use Text::MeCab::Easy;
+    my $mt = Text::MeCab::Easy->new;
+    $mt->parse("昨日の晩御飯は鮭のふりかけと味噌汁だけでした。");
+
+    my $filtered = $mt->filter(type => [qw/名詞 助動詞/]);
+    print Dumper $filtered;
 
 # DESCRIPTION
 

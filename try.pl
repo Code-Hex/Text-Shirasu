@@ -12,7 +12,7 @@ my $mt = Text::MeCab::Easy->new;
 $mt->parse("昨日の晩御飯は鮭のふりかけと味噌汁だけでした。");
 #$mt->print;
 
-my $filtered = $mt->filter(part_of_speech => [qw/名詞/]);
+my @filtered = $mt->search(type => [qw/名詞 助動詞/]);
 
-print Dumper $filtered;
+print Dumper \@filtered;
 

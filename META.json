@@ -42,6 +42,8 @@
       },
       "runtime" : {
          "requires" : {
+            "Contextual::Return" : "0",
+            "Text::MeCab" : "0",
             "perl" : "5.008001"
          }
       },
@@ -52,6 +54,17 @@
       }
    },
    "release_status" : "unstable",
+   "resources" : {
+      "bugtracker" : {
+         "web" : "https://github.com/Code-Hex/Text-MeCab-Easy/issues"
+      },
+      "homepage" : "https://github.com/Code-Hex/Text-MeCab-Easy",
+      "repository" : {
+         "type" : "git",
+         "url" : "git://github.com/Code-Hex/Text-MeCab-Easy.git",
+         "web" : "https://github.com/Code-Hex/Text-MeCab-Easy"
+      }
+   },
    "version" : "0.01",
    "x_serialization_backend" : "JSON::PP version 2.27300"
 }
