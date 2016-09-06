@@ -42,7 +42,6 @@
       },
       "runtime" : {
          "requires" : {
-            "Contextual::Return" : "0",
             "Text::MeCab" : "0",
             "enum" : "0",
             "perl" : "5.008001"

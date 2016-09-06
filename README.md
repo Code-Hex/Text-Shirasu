@@ -4,13 +4,13 @@ Text::MeCab::Soup - It's new $module
 
 # SYNOPSIS
 
-    use Data::Dumper;
+    use utf8;
     use Text::MeCab::Soup;
     my $mt = Text::MeCab::Soup->new;
-    $mt->parse("昨日の晩御飯は鮭のふりかけと味噌汁だけでした。");
+    my $parse = $mt->parse("昨日の晩御飯は「鮭のふりかけ」と「味噌汁」だけでした。");
 
-    my $filtered = $mt->filter(type => [qw/名詞 助動詞/]);
-    print Dumper $filtered;
+    my $search = $parse->search(type => [qw/名詞 助動詞/], 記号 => [qw/括弧開 括弧閉/]);
+    print Dumper $search->result;
 
 # DESCRIPTION
 

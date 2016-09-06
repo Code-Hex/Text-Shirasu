@@ -7,7 +7,6 @@ use utf8;
 use Carp;
 use Encode;
 use Text::MeCab;
-use Contextual::Return;
 
 our $VERSION = "0.01";
 
@@ -74,21 +73,7 @@ sub search {
         } @{$self->{result}}
     ];
 
-    return 
-        OBJREF  { $self }
-        DEFAULT { $self->{result} };
-}
-
-sub _sub_query {
-    my ($subtype, $query) = @_;
-
-    return 1 unless ref $query eq 'ARRAY';
-
-    my $judge = @{$query} > 1 ?
-                join '|', map { encode_utf8($_) } @{$query}
-                : encode_utf8(shift @{$query});
-    
-    return $subtype =~ /$judge/;
+    return $self;
 }
 
 sub join_surface {
@@ -114,6 +99,19 @@ sub dumper {
     print $dumper;
 }
 
+# sub routine
+sub _sub_query {
+    my ($subtype, $query) = @_;
+
+    return 1 unless ref $query eq 'ARRAY';
+
+    my $judge = @{$query} > 1 ?
+                join '|', map { encode_utf8($_) } @{$query}
+                : encode_utf8(shift @{$query});
+    
+    return $subtype =~ /$judge/;
+}
+
 
 1;
 __END__
@@ -126,13 +124,13 @@ Text::MeCab::Soup - It's new $module
 
 =head1 SYNOPSIS
 
-    use Data::Dumper;
+    use utf8;
     use Text::MeCab::Soup;
     my $mt = Text::MeCab::Soup->new;
-    $mt->parse("昨日の晩御飯は鮭のふりかけと味噌汁だけでした。");
+    my $parse = $mt->parse("昨日の晩御飯は「鮭のふりかけ」と「味噌汁」だけでした。");
 
-    my $filtered = $mt->filter(type => [qw/名詞 助動詞/]);
-    print Dumper $filtered;
+    my $search = $parse->search(type => [qw/名詞 助動詞/], 記号 => [qw/括弧開 括弧閉/]);
+    print Dumper $search->result;
 
 =head1 DESCRIPTION
 
