@@ -11,10 +11,8 @@ use Contextual::Return;
 
 our $VERSION = "0.01";
 
-use constant FEATURE_TABLE => {
-    'type'    => 0,
-    'subtype' => 1
-};
+use enum qw/Type Subtype/;
+
 
 sub mecab  { $_[0]->{mecab}  }
 sub result { $_[0]->{result} }
@@ -71,7 +69,7 @@ sub search {
 
     $self->{result} = [ 
         grep {
-            $_->{feature}->[ FEATURE_TABLE->{type} ] =~ /($judge)/
+            $_->{feature}->[ Type ] =~ /($judge)/
             and _sub_query($_->{feature}->[1], $params{decode_utf8($1)})
         } @{$self->{result}}
     ];
