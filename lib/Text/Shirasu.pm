@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use utf8;
 
-use Carp;
+use Carp ();
 use Encode;
 use Text::MeCab;
 
@@ -143,7 +143,7 @@ Text::Shirasu - Text::MeCab wrapper
 
     use utf8;
     use Text::Shirasu;
-    my $ts = Text::Shirasu->new;
+    my $ts = Text::Shirasu->new; # this parameter is same as Text::MeCab
     my $parse = $ts->parse("昨日の晩御飯は「鮭のふりかけ」と「味噌汁」だけでした。");
 
     use Data::Dumper;
