@@ -10,8 +10,7 @@ use Text::MeCab;
 
 our $VERSION = "0.0.1";
 
-use enum qw/Type Subtype/;
-
+use constant Type => 0;
 
 sub mecab  { $_[0]->{mecab}  }
 sub result { $_[0]->{result} }
@@ -56,13 +55,20 @@ sub parse {
 
 sub tr {
     my $self = shift;
-    my %params = ref $_[0] eq 'HASH' ? %{$_[0]} : @_;
+    my %params = ref $_[0] eq 'HASH' ?
+          map { encode_utf8($_) } %{$_[0]}
+        : map { encode_utf8($_) } @_;
 
-    my $replace;
-    for my $key (keys %params) {
-        $replace .= "s/$key/$params{$key}/g;";
+    my @keys = keys %params;
+
+    for (@{ $self->{result} }) {
+        # Is it faster eval...!?
+        for my $key (@keys) {
+            $_->{surface} =~ s/$key/$params{$key}/g;
+        }
     }
-    return $replace;
+
+    return $self;
 }
 
 sub search {
@@ -70,7 +76,7 @@ sub search {
     my %params = ref $_[0] eq 'HASH' ? %{$_[0]} : @_;
 
     # and search
-    my $type = delete $params{type} or Carp::croak "Does not input search query: \"type\"";
+    my $type = delete $params{type} or Carp::croak 'Does not input search query: "type"';
 
     # making parameter as /名詞|動詞/ or /名詞/
     my $judge = @$type > 1 ?
