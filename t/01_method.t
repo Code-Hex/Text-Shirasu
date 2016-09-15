@@ -4,7 +4,7 @@ use Test::More 0.98;
 use FindBin;
 BEGIN { push @INC, "$FindBin::Bin/../lib"; };
 
-use Text::MeCab::Soup;
+use Text::Shirasu;
 
 done_testing;
 

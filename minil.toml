@@ -1,4 +1,4 @@
-name = "Text-MeCab-Soup"
+name = "Text-Shirasu"
 # badges = ["travis"]
 module_maker="ModuleBuildTiny"
 

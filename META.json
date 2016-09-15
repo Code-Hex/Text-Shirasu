@@ -12,7 +12,7 @@
       "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
       "version" : "2"
    },
-   "name" : "Text-MeCab-Soup",
+   "name" : "Text-Shirasu",
    "no_index" : {
       "directory" : [
          "t",
@@ -43,7 +43,6 @@
       "runtime" : {
          "requires" : {
             "Text::MeCab" : "0",
-            "enum" : "0",
             "perl" : "5.008001"
          }
       },
@@ -56,15 +55,15 @@
    "release_status" : "unstable",
    "resources" : {
       "bugtracker" : {
-         "web" : "https://github.com/Code-Hex/Text-MeCab-Easy/issues"
+         "web" : "https://github.com/Code-Hex/Text-Shirasu/issues"
       },
-      "homepage" : "https://github.com/Code-Hex/Text-MeCab-Easy",
+      "homepage" : "https://github.com/Code-Hex/Text-Shirasu",
       "repository" : {
          "type" : "git",
-         "url" : "git://github.com/Code-Hex/Text-MeCab-Easy.git",
-         "web" : "https://github.com/Code-Hex/Text-MeCab-Easy"
+         "url" : "git://github.com/Code-Hex/Text-Shirasu.git",
+         "web" : "https://github.com/Code-Hex/Text-Shirasu"
       }
    },
-   "version" : "0.01",
+   "version" : "0.0.1",
    "x_serialization_backend" : "JSON::PP version 2.27300"
 }

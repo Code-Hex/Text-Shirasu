@@ -1,4 +1,3 @@
-requires 'enum';
 requires 'Text::MeCab';
 requires 'perl', '5.008001';
 

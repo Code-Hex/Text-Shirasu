@@ -1,4 +1,4 @@
-package Text::MeCab::Soup;
+package Text::Shirasu;
 
 use strict;
 use warnings;
@@ -8,7 +8,7 @@ use Carp;
 use Encode;
 use Text::MeCab;
 
-our $VERSION = "0.01";
+our $VERSION = "0.0.1";
 
 use enum qw/Type Subtype/;
 
@@ -21,8 +21,8 @@ sub new {
     my %args = ref $_[0] eq 'HASH' ? %{$_[0]} : @_;
     return bless {
         mecab  => Text::MeCab->new(%args),
-        result => []
-    }, $class;
+        result => +[]
+    } => $class;
 }
 
 sub parse {
@@ -54,14 +54,25 @@ sub parse {
     return $self;
 }
 
+sub tr {
+    my $self = shift;
+    my %params = ref $_[0] eq 'HASH' ? %{$_[0]} : @_;
+
+    my $replace;
+    for my $key (keys %params) {
+        $replace .= "s/$key/$params{$key}/g;";
+    }
+    return $replace;
+}
+
 sub search {
     my $self = shift;
     my %params = ref $_[0] eq 'HASH' ? %{$_[0]} : @_;
 
-    # AND search
+    # and search
     my $type = delete $params{type} or Carp::croak "Does not input search query: \"type\"";
 
-    # Making parameter as /名詞|動詞/ or /名詞/
+    # making parameter as /名詞|動詞/ or /名詞/
     my $judge = @$type > 1 ?
                 join '|', map { encode_utf8($_) } @$type
                 : encode_utf8(shift @$type);
@@ -120,13 +131,13 @@ __END__
 
 =head1 NAME
 
-Text::MeCab::Soup - It's new $module
+Text::Shirasu - It's new $module
 
 =head1 SYNOPSIS
 
     use utf8;
-    use Text::MeCab::Soup;
-    my $mt = Text::MeCab::Soup->new;
+    use Text::Shirasu;
+    my $mt = Text::Shirasu->new;
     my $parse = $mt->parse("昨日の晩御飯は「鮭のふりかけ」と「味噌汁」だけでした。");
 
     my $search = $parse->search(type => [qw/名詞 助動詞/], 記号 => [qw/括弧開 括弧閉/]);
@@ -134,7 +145,7 @@ Text::MeCab::Soup - It's new $module
 
 =head1 DESCRIPTION
 
-Text::MeCab::Soup is ...
+Text::Shirasu is ...
 
 =head1 LICENSE
 
@@ -148,4 +159,3 @@ it under the same terms as Perl itself.
 K E<lt>x00.x7f@gmail.comE<gt>
 
 =cut
-

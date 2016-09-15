@@ -5,7 +5,7 @@ use FindBin;
 BEGIN { push @INC, "$FindBin::Bin/../lib"; };
 
 use_ok $_ for qw(
-    Text::MeCab::Soup
+    Text::Shirasu
 );
 
 done_testing;
