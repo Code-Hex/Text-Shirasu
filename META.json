@@ -1,7 +1,7 @@
 {
-   "abstract" : "It's new $module",
+   "abstract" : "Text::MeCab wrapper",
    "author" : [
-      "K <x00.x7f@gmail.com>"
+      "Kei Kamikawa <x00.x7f@gmail.com>"
    ],
    "dynamic_config" : 0,
    "generated_by" : "Minilla/v3.0.4, CPAN::Meta::Converter version 2.150005",
