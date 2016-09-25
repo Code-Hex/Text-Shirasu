@@ -10,7 +10,7 @@ use Text::MeCab;
 
 our $VERSION = "0.0.1";
 
-use constant Type => 0;
+use constant DEBUG => 1;
 
 sub mecab  { $_[0]->{mecab}  }
 sub result { $_[0]->{result} }
@@ -71,11 +71,8 @@ sub tr {
 
     my $query = join '|', @keys;
 
-    # replace
-    for (@{ $self->{result} }) {
-        # Is it faster eval...!?
-        $_->{surface} =~ s/($query)/$params{$1}/g;
-    }
+    # replacement
+    $_->{surface} =~ s/($query)/$params{$1}/g for @{ $self->{result} };
 
     return $self;
 }
@@ -93,7 +90,7 @@ sub search {
 
     $self->{result} = [ 
         grep {
-            $_->{feature}->[ Type ] =~ /($query)/
+            $_->{feature}->[0] =~ /($query)/
             and _sub_query($_->{feature}->[1], $params{decode_utf8($1)})
         } @{$self->{result}}
     ];
@@ -110,15 +107,14 @@ sub join_surface {
 sub print {
     my $self = shift;
     my ($msg, $level) = @_;
-    my $fh = $level && $level >= 1 ? *STDERR : *STDOUT;
+    my $fh = $level && $level >= DEBUG ? *STDERR : *STDOUT;
     print {$fh} $msg;
 }
 
 sub result_dump {
     my $self = shift;
     local $Data::Dumper::Sortkeys = 1;
-    my $dumper = Data::Dumper::Dumper($self->{result});
-    $self->print($dumper, 1);
+    $self->print(Data::Dumper::Dumper($self->{result}) => DEBUG);
 }
 
 # sub routine
@@ -127,9 +123,7 @@ sub _sub_query {
 
     return 1 unless ref $query eq 'ARRAY';
 
-    my $judge = @{$query} > 1 ?
-                join '|', map { encode_utf8($_) } @{$query}
-                : encode_utf8(shift @{$query});
+    my $judge = join '|', map { encode_utf8($_) } @$query;
     
     return $subtype =~ /$judge/;
 }
