@@ -14,7 +14,7 @@ $mt->parse("昨日の晩御飯は，鮭のふりかけと味噌汁だけでし�
 #$mt->print;
 
 print $mt->join_surface."\n\n";
-say $mt->tr('，' => ',', '！' => '!', '？' => '?')->join_surface;
+say $mt->tr('，！？' => ',!?')->join_surface;
 
 say $mt->search(type => [qw/名詞 助動詞 記号/], 記号 => [qw/括弧開 括弧閉/])->join_surface;
 

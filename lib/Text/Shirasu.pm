@@ -60,8 +60,18 @@ sub tr {
         map { utf8::is_utf8($_) ? encode_utf8($_) : $_ } @_;
 
     my @keys = keys %params;
+
+    if (@keys == 1) {
+        my $key = shift @keys;
+        @keys = map { encode_utf8($_) } split //, decode_utf8($key);
+        my @vals = map { encode_utf8($_) } split //, decode_utf8($params{$key});
+        
+        %params = map { $keys[$_] => $vals[$_] } 0 .. $#keys;
+    }
+
     my $query = join '|', @keys;
 
+    # replace
     for (@{ $self->{result} }) {
         # Is it faster eval...!?
         $_->{surface} =~ s/($query)/$params{$1}/g;
