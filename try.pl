@@ -17,4 +17,5 @@ print $mt->join_surface."\n\n";
 say $mt->tr('，！？' => ',!?')->join_surface;
 
 say $mt->search(type => [qw/名詞 助動詞 記号/], 記号 => [qw/括弧開 括弧閉/])->join_surface;
+$mt->result_dump;
 

@@ -5,16 +5,16 @@ Text::Shirasu - Text::MeCab wrapper
 # SYNOPSIS
 
     use utf8;
+    use feature ':5.10';
     use Text::Shirasu;
-    my $ts = Text::Shirasu->new; # this parameter is same as Text::MeCab
+    my $ts = Text::Shirasu->new; # this parameter same as Text::MeCab
     my $parse = $ts->parse("昨日の晩御飯は「鮭のふりかけ」と「味噌汁」だけでした。");
 
-    use Data::Dumper;
-    my $search = $parse->search(type => [qw/名詞 助動詞/], 記号 => [qw/括弧開 括弧閉/]);
-    print Dumper $search->result;
-
     my $tr = $parse->tr('。' => '.');
-    print Dumper $tr->result;
+    say $tr->join_surface;
+    
+    my $search = $parse->search(type => [qw/名詞 助動詞/], 記号 => [qw/括弧開 括弧閉/]);
+    say $search->join_surface;
 
 # DESCRIPTION
 
