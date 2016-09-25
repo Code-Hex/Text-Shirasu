@@ -13,7 +13,7 @@ Text::Shirasu - Text::MeCab wrapper
     my $search = $parse->search(type => [qw/名詞 助動詞/], 記号 => [qw/括弧開 括弧閉/]);
     print Dumper $search->result;
 
-    my $tr = $parse->parse('。' => '.');
+    my $tr = $parse->tr('。' => '.');
     print Dumper $tr->result;
 
 # DESCRIPTION

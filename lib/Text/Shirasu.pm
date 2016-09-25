@@ -55,17 +55,16 @@ sub parse {
 
 sub tr {
     my $self = shift;
-    my %params = ref $_[0] eq 'HASH' ?
-          map { encode_utf8($_) } %{$_[0]}
-        : map { encode_utf8($_) } @_;
+    my %params = ref $_[0] eq 'HASH' ? 
+        map { utf8::is_utf8($_) ? encode_utf8($_) : $_ } %{$_[0]} :
+        map { utf8::is_utf8($_) ? encode_utf8($_) : $_ } @_;
 
     my @keys = keys %params;
+    my $query = join '|', @keys;
 
     for (@{ $self->{result} }) {
         # Is it faster eval...!?
-        for my $key (@keys) {
-            $_->{surface} =~ s/$key/$params{$key}/g;
-        }
+        $_->{surface} =~ s/($query)/$params{$1}/g;
     }
 
     return $self;
@@ -76,16 +75,15 @@ sub search {
     my %params = ref $_[0] eq 'HASH' ? %{$_[0]} : @_;
 
     # and search
-    my $type = delete $params{type} or Carp::croak 'Does not input search query: "type"';
+    my @type = map { utf8::is_utf8($_) ? encode_utf8($_) : $_ } @{ delete $params{type} } 
+                    or Carp::croak 'Does not input search query: "type"';
 
     # making parameter as /名詞|動詞/ or /名詞/
-    my $judge = @$type > 1 ?
-                join '|', map { encode_utf8($_) } @$type
-                : encode_utf8(shift @$type);
+    my $query = join '|', @type;
 
     $self->{result} = [ 
         grep {
-            $_->{feature}->[ Type ] =~ /($judge)/
+            $_->{feature}->[ Type ] =~ /($query)/
             and _sub_query($_->{feature}->[1], $params{decode_utf8($1)})
         } @{$self->{result}}
     ];
@@ -150,7 +148,7 @@ Text::Shirasu - Text::MeCab wrapper
     my $search = $parse->search(type => [qw/名詞 助動詞/], 記号 => [qw/括弧開 括弧閉/]);
     print Dumper $search->result;
 
-    my $tr = $parse->parse('。' => '.');
+    my $tr = $parse->tr('。' => '.');
     print Dumper $tr->result;
 
 =head1 DESCRIPTION
