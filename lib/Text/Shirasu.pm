@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use utf8;
 
-use Carp ();
+use Carp 'croak';
 use Encode;
 use Text::MeCab;
 
@@ -25,7 +25,8 @@ sub new {
 }
 
 sub parse {
-    my ($self, $sentence) = @_;
+    my $self = shift;
+    my $sentence = utf8::is_utf8($_[0]) ? encode_utf8($_[0]) : $_[0];
 
     my $mt = $self->{mecab};
 
@@ -83,7 +84,7 @@ sub search {
 
     # and search
     my @type = map { utf8::is_utf8($_) ? encode_utf8($_) : $_ } @{ delete $params{type} } 
-                    or Carp::croak 'Does not input search query: "type"';
+                    or croak 'Does not input search query: "type"';
 
     # making parameter as /名詞|動詞/ or /名詞/
     my $query = join '|', @type;
@@ -100,7 +101,7 @@ sub search {
 
 sub join_surface {
     my $self = shift;
-    Carp::croak "Does not exist parsed results" unless exists $self->{result};
+    croak "Does not exist parsed results" unless exists $self->{result};
     return join '', map { $_->{surface} } @{$self->{result}};
 }
 

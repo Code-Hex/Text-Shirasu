@@ -10,7 +10,7 @@ BEGIN { push @INC, "$FindBin::Bin/lib"; };
 use Text::Shirasu;
 
 my $mt = Text::Shirasu->new;
-$mt->parse("昨日の晩御飯は，鮭のふりかけと味噌汁だけでしたか！？");
+$mt->parse("昨日の晩御飯は，鮭のふりかけと「味噌汁」だけでしたか！？");
 #$mt->print;
 
 print $mt->join_surface."\n\n";
