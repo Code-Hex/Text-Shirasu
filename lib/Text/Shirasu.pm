@@ -12,10 +12,6 @@ our $VERSION = "0.0.1";
 
 use constant DEBUG => 1;
 
-sub mecab  { $_[0]->{mecab}  }
-sub result { $_[0]->{result} }
-
-
 =encoding utf-8
 
 =head1 NAME
@@ -33,12 +29,12 @@ Text::Shirasu - Text::MeCab wrapper
     my $tr = $parse->tr('。' => '.');
     say $tr->join_surface;
     
-    my $search = $parse->search(type => [qw/名詞 助動詞/], 記号 => [qw/括弧開 括弧閉/]);
-    say $search->join_surface;
+    my $filter = $parse->filter(type => [qw/名詞 助動詞/], 記号 => [qw/括弧開 括弧閉/]);
+    say $filter->join_surface;
 
 =head1 DESCRIPTION
 
-Text::Shirasu wrapped L<Text::MeCab>.  
+Text::Shirasu is wrapped L<Text::MeCab>.  
 This module has functions filter, replacement, etc...
 
 =cut
@@ -95,8 +91,7 @@ sub parse {
 
     $ts->tr('，！？' => ',!?');
 
-parse メソッド実行後にオブジェクト内に保存されている surface の文字列を置換します。
-Perl の tr と同じように使います。実行結果はオブジェクト内に保存されます。
+Perl の tr と同じように parse メソッド実行後にオブジェクト内に保存されている surface の文字列を置換します。
 =cut
 
 sub tr {
@@ -123,24 +118,23 @@ sub tr {
     return $self;
 }
 
-=head2 search
+=head2 filter
     
-    $ts->search(type => [qw/名詞/]);
-    $ts->search(type => [qw/名詞 記号/], 記号 => [qw/括弧開 括弧閉/]);
+    $ts->filter(type => [qw/名詞/]);
+    $ts->filter(type => [qw/名詞 記号/], 記号 => [qw/括弧開 括弧閉/]);
 
-parse メソッド実行後にオブジェクト内に保存されている surface の文字列を feature の情報を利用して条件をもとに絞り込みます。
+parse メソッド実行後にオブジェクト内に保存されている surface を feature の情報を利用して条件をもとに絞り込みます。
 type をキーに欲しい品詞の情報を渡します。さらにその品詞の中から細かく絞り込みたい時は、その品詞名をキーにして、細かい情報を渡します。
-実行結果はオブジェクト内に保存されます。
 
 =cut
 
-sub search {
+sub filter {
     my $self = shift;
     my %params = ref $_[0] eq 'HASH' ? %{$_[0]} : @_;
 
-    # and search
+    # and filter
     my @type = map { utf8::is_utf8($_) ? encode_utf8($_) : $_ } @{ delete $params{type} } 
-                    or croak 'Does not input search query: "type"';
+                    or croak 'Does not input query: "type"';
 
     # making parameter as /名詞|動詞/ or /名詞/
     my $query = join '|', @type;
@@ -155,23 +149,58 @@ sub search {
     return $self;
 }
 
+=head2 join_surface
+    
+    $ts->join_surface()
+
+オブジェクト内に保存されている surface を全て結合した文字列を返します。
+
+=cut
+
 sub join_surface {
     my $self = shift;
     croak "Does not exist parsed results" unless exists $self->{result};
     return join '', map { $_->{surface} } @{$self->{result}};
 }
 
-sub print {
-    my $self = shift;
-    my ($msg, $level) = @_;
-    my $fh = $level && $level >= DEBUG ? *STDERR : *STDOUT;
-    print {$fh} $msg;
-}
+=head2 result
+    
+    $ts->result
+
+parse メソッドで入手した情報を格納したデータを返します。
+tr や filter メソッドを利用すると result 内の surface の情報が変化します。  
+
+=cut
+sub result { $_[0]->{result} }
+
+=head2 mecab
+    
+    $ts->mecab
+
+Text::MeCab のオブジェクトを利用することができます。  
+
+=cut
+sub mecab  { $_[0]->{mecab}  }
+
+=head2 result_dump
+    
+    $ts->result_dump()
+
+オブジェクト内に保存されている result 内のデータ構造を Data::Dumper を用いて表示します。
+
+=cut
 
 sub result_dump {
     my $self = shift;
     local $Data::Dumper::Sortkeys = 1;
-    $self->print(Data::Dumper::Dumper($self->{result}) => DEBUG);
+    $self->_print(Data::Dumper::Dumper($self->{result}) => DEBUG);
+}
+
+sub _print {
+    my $self = shift;
+    my ($msg, $level) = @_;
+    my $fh = $level && $level >= DEBUG ? *STDERR : *STDOUT;
+    print {$fh} $msg;
 }
 
 # sub routine

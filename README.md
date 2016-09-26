@@ -13,12 +13,12 @@ Text::Shirasu - Text::MeCab wrapper
     my $tr = $parse->tr('。' => '.');
     say $tr->join_surface;
     
-    my $search = $parse->search(type => [qw/名詞 助動詞/], 記号 => [qw/括弧開 括弧閉/]);
-    say $search->join_surface;
+    my $filter = $parse->filter(type => [qw/名詞 助動詞/], 記号 => [qw/括弧開 括弧閉/]);
+    say $filter->join_surface;
 
 # DESCRIPTION
 
-Text::Shirasu wrapped [Text::MeCab](https://metacpan.org/pod/Text::MeCab).  
+Text::Shirasu is wrapped [Text::MeCab](https://metacpan.org/pod/Text::MeCab).  
 This module has functions filter, replacement, etc...
 
 ## parse
@@ -33,17 +33,40 @@ parse メソッドは実行結果をオブジェクト内に保存し、オブ�
 
     $ts->tr('，！？' => ',!?');
 
-parse メソッド実行後にオブジェクト内に保存されている surface の文字列を置換します。
-Perl の tr と同じように使います。実行結果はオブジェクト内に保存されます。
+Perl の tr と同じように parse メソッド実行後にオブジェクト内に保存されている surface の文字列を置換します。
 
-## search
+## filter
 
-    $ts->search(type => [qw/名詞/]);
-    $ts->search(type => [qw/名詞 記号/], 記号 => [qw/括弧開 括弧閉/]);
+    $ts->filter(type => [qw/名詞/]);
+    $ts->filter(type => [qw/名詞 記号/], 記号 => [qw/括弧開 括弧閉/]);
 
-parse メソッド実行後にオブジェクト内に保存されている surface の文字列を feature の情報を利用して条件をもとに絞り込みます。
+parse メソッド実行後にオブジェクト内に保存されている surface を feature の情報を利用して条件をもとに絞り込みます。
 type をキーに欲しい品詞の情報を渡します。さらにその品詞の中から細かく絞り込みたい時は、その品詞名をキーにして、細かい情報を渡します。
-実行結果はオブジェクト内に保存されます。
+
+## join\_surface
+
+    $ts->join_surface()
+
+オブジェクト内に保存されている surface を全て結合した文字列を返します。
+
+## result
+
+    $ts->result
+
+parse メソッドで入手した情報を格納したデータを返します。
+tr や filter メソッドを利用すると result 内の surface の情報が変化します。  
+
+## mecab
+
+    $ts->mecab
+
+Text::MeCab のオブジェクトを利用することができます。  
+
+## result\_dump
+
+    $ts->result_dump()
+
+オブジェクト内に保存されている result 内のデータ構造を Data::Dumper を用いて表示します。
 
 # LICENSE
 
