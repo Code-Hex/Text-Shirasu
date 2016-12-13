@@ -1,4 +1,5 @@
 requires 'Text::MeCab';
+requires 'Lingua::JA::NormalizeText';
 requires 'perl', '5.008001';
 
 on 'test' => sub {

@@ -7,6 +7,7 @@ use utf8;
 use Carp 'croak';
 use Encode;
 use Text::MeCab;
+use Lingua::JA::NormalizeText;
 
 our $VERSION = "0.0.1";
 
@@ -43,8 +44,30 @@ sub new {
     my $class = shift;
     my %args = ref $_[0] eq 'HASH' ? %{$_[0]} : @_;
     return bless {
-        mecab  => Text::MeCab->new(%args),
-        result => +[]
+        mecab     => Text::MeCab->new(%args),
+        result    => +[],
+        normalize => +[qw/
+            nfkc
+            nfkd
+            nfc
+            nfd
+            alnum_z2h
+            space_z2h
+            katakana_h2z
+            decode_entities
+            unify_nl
+            unify_whitespaces
+            unify_long_spaces
+            trim
+            old2new_kana
+            old2new_kanji
+            tab2space
+            all_dakuon_normalize
+            square2katakana
+            circled2kana
+            circled2kanji
+            decompose_parenthesized_kanji
+        /, \&normalize_hyphen, \&normalize_symbols],
     } => $class;
 }
 
@@ -60,6 +83,7 @@ parse メソッドは実行結果をオブジェクト内に保存し、オブ�
 sub parse {
     my $self = shift;
     my $sentence = utf8::is_utf8($_[0]) ? encode_utf8($_[0]) : $_[0];
+    croak "Sentence has not been inputted" unless $sentence;
 
     my $mt = $self->{mecab};
 
@@ -85,6 +109,20 @@ sub parse {
     }
 
     return $self;
+}
+
+=head2 normalize
+    
+    $ts->normalize
+
+Lingua::JA::NormalizeText を用いてテキストの正規化を行います.
+=cut
+
+sub normalize {
+    my $self = shift;
+    my $text = shift;
+    my $normalizer = Lingua::JA::NormalizeText->new(@_ || @{$self->{normalize}});
+    $normalizer->normalize(utf8::is_utf8($text) ? $text : decode_utf8($text));
 }
 
 =head2 tr
@@ -134,7 +172,7 @@ sub filter {
 
     # and filter
     my @type = map { utf8::is_utf8($_) ? encode_utf8($_) : $_ } @{ delete $params{type} } 
-                    or croak 'Does not input query: "type"';
+                    or croak 'Query has not been inputted: "type"';
 
     # making parameter as /名詞|動詞/ or /名詞/
     my $query = join '|', @type;
@@ -212,6 +250,22 @@ sub _sub_query {
     my $judge = join '|', map { encode_utf8($_) } @$query;
     
     return $subtype =~ /$judge/;
+}
+
+sub normalize_hyphen {
+    local $_ = shift; return undef unless defined $_;
+    s/[˗֊‐‑‒–⁃⁻₋−]/-/g;
+    s/[﹣－ｰ—―─━ー]/ー/g;
+    s/[~∼∾〜〰～]//g;
+    s/ー+/ー/g;
+    $_;
+}
+
+sub normalize_symbols {
+    local $_ = shift;
+    return undef unless defined $_;
+    tr/。、・「」/｡､･｢｣/;
+    $_;
 }
 
 
