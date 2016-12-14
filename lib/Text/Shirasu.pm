@@ -3,15 +3,61 @@ package Text::Shirasu;
 use strict;
 use warnings;
 use utf8;
-
-use Carp 'croak';
-use Encode;
+use Exporter 'import';
 use Text::MeCab;
+use Carp 'croak';
+use Data::Dumper;
+use Text::Shirasu::Node;
 use Lingua::JA::NormalizeText;
+use Encode qw/encode_utf8 decode_utf8/;
 
-our $VERSION = "0.0.1";
+our $VERSION   = "0.0.1";
+our @EXPORT_OK = (@Lingua::JA::NormalizeText::EXPORT_OK, qw/normalize_hyphen normalize_symbols/);
 
-use constant DEBUG => 1;
+*nfkc                 = \&Lingua::JA::NormalizeText::nfkc;
+*nfkd                 = \&Lingua::JA::NormalizeText::nfkd;
+*nfc                  = \&Lingua::JA::NormalizeText::nfc;
+*nfd                  = \&Lingua::JA::NormalizeText::nfd;
+*decode_entities      = \&Lingua::JA::NormalizeText::decode_entities;
+*alnum_z2h            = \&Lingua::JA::NormalizeText::alnum_z2h;
+*alnum_h2z            = \&Lingua::JA::NormalizeText::alnum_h2z;
+*space_z2h            = \&Lingua::JA::NormalizeText::space_z2h;
+*space_h2z            = \&Lingua::JA::NormalizeText::space_h2z;
+*katakana_z2h         = \&Lingua::JA::NormalizeText::katakana_z2h;
+*katakana_h2z         = \&Lingua::JA::NormalizeText::katakana_h2z;
+*katakana2hiragana    = \&Lingua::JA::NormalizeText::katakana2hiragana;
+*hiragana2katakana    = \&Lingua::JA::NormalizeText::hiragana2katakana;
+*dakuon_normalize     = \&Lingua::JA::NormalizeText::dakuon_normalize;
+*handakuon_normalize  = \&Lingua::JA::NormalizeText::handakuon_normalize;
+*all_dakuon_normalize = \&Lingua::JA::NormalizeText::all_dakuon_normalize;
+*square2katakana      = \&Lingua::JA::NormalizeText::square2katakana;
+*circled2kana         = \&Lingua::JA::NormalizeText::circled2kana;
+*circled2kanji        = \&Lingua::JA::NormalizeText::circled2kanji;
+*strip_html           = \&Lingua::JA::NormalizeText::strip_html;
+*wave2tilde           = \&Lingua::JA::NormalizeText::wave2long;
+*tilde2wave           = \&Lingua::JA::NormalizeText::tilde2wave;
+*wavetilde2long       = \&Lingua::JA::NormalizeText::wavetilde2long;
+*wave2long            = \&Lingua::JA::NormalizeText::wave2long;
+*tilde2long           = \&Lingua::JA::NormalizeText::tilde2long;
+*fullminus2long       = \&Lingua::JA::NormalizeText::fullminus2long;
+*dashes2long          = \&Lingua::JA::NormalizeText::dashes2long;
+*drawing_lines2long   = \&Lingua::JA::NormalizeText::drawing_lines2long;
+*unify_long_repeats   = \&Lingua::JA::NormalizeText::unify_long_repeats;
+*unify_long_spaces    = \&Lingua::JA::NormalizeText::unify_long_spaces;
+*unify_whitespaces    = \&Lingua::JA::NormalizeText::unify_whitespaces;
+*trim                 = \&Lingua::JA::NormalizeText::trim;
+*ltrim                = \&Lingua::JA::NormalizeText::ltrim;
+*rtrim                = \&Lingua::JA::NormalizeText::rtrim;
+*nl2space             = \&Lingua::JA::NormalizeText::nl2space;
+*unify_nl             = \&Lingua::JA::NormalizeText::unify_nl;
+*tab2space            = \&Lingua::JA::NormalizeText::tab2space;
+*old2new_kana         = \&Lingua::JA::NormalizeText::old2new_kana;
+*remove_controls      = \&Lingua::JA::NormalizeText::remove_controls;
+*remove_spaces        = \&Lingua::JA::NormalizeText::remove_spaces;
+*remove_DFC           = \&Lingua::JA::NormalizeText::remove_DFC;
+*old2new_kanji        = \&Lingua::JA::NormalizeText::old2new_kanji;
+*decompose_parenthesized_kanji
+    = \&Lingua::JA::NormalizeText::decompose_parenthesized_kanji;
 
 =encoding utf-8
 
@@ -27,7 +73,10 @@ Text::Shirasu - Text::MeCab wrapper
     my $ts = Text::Shirasu->new; # this parameter same as Text::MeCab
     my $parse = $ts->parse("昨日の晩御飯は「鮭のふりかけ」と「味噌汁」だけでした。");
 
-    my $tr = $parse->tr('。' => '.');
+    for (@{ $ts->nodes }) {
+        say $ts->surface;
+    }
+
     say $tr->join_surface;
     
     my $filter = $parse->filter(type => [qw/名詞 助動詞/], 記号 => [qw/括弧開 括弧閉/]);
@@ -42,32 +91,33 @@ This module has functions filter, replacement, etc...
 
 sub new {
     my $class = shift;
-    my %args = ref $_[0] eq 'HASH' ? %{$_[0]} : @_;
+    my %args = ref $_[0] eq 'HASH' ? %{ $_[0] } : @_;
     return bless {
         mecab     => Text::MeCab->new(%args),
-        result    => +[],
+        nodes     => +[],
         normalize => +[qw/
-            nfkc
-            nfkd
-            nfc
-            nfd
-            alnum_z2h
-            space_z2h
-            katakana_h2z
-            decode_entities
-            unify_nl
-            unify_whitespaces
-            unify_long_spaces
-            trim
-            old2new_kana
-            old2new_kanji
-            tab2space
-            all_dakuon_normalize
-            square2katakana
-            circled2kana
-            circled2kanji
-            decompose_parenthesized_kanji
-        /, \&normalize_hyphen, \&normalize_symbols],
+                nfkc
+                nfkd
+                nfc
+                nfd
+                alnum_z2h
+                space_z2h
+                katakana_h2z
+                decode_entities
+                unify_nl
+                unify_whitespaces
+                unify_long_spaces
+                trim
+                old2new_kana
+                old2new_kanji
+                tab2space
+                all_dakuon_normalize
+                square2katakana
+                circled2kana
+                circled2kanji
+                decompose_parenthesized_kanji
+            /, \&normalize_hyphen, \&normalize_symbols
+        ],
     } => $class;
 }
 
@@ -81,20 +131,21 @@ parse メソッドは実行結果をオブジェクト内に保存し、オブ�
 =cut
 
 sub parse {
-    my $self = shift;
-    my $sentence = utf8::is_utf8($_[0]) ? encode_utf8($_[0]) : $_[0];
+    my $self     = shift;
+    my $sentence = $_[0];
+
     croak "Sentence has not been inputted" unless $sentence;
 
     my $mt = $self->{mecab};
 
     # initialize
-    $self->{result} = [];
+    $self->{nodes} = [];
 
     for (my $node = $mt->parse($sentence); $node && $node->surface; $node = $node->next) {
-        push @{$self->{result}}, {
+        push @{ $self->{nodes} }, bless {
             id      => $node->id,
             surface => $node->surface,
-            feature => [split /,/, $node->feature],
+            feature => [ split /,/, $node->feature ],
             length  => $node->length,
             rlength => $node->rlength,
             lcattr  => $node->lcattr,
@@ -105,7 +156,7 @@ sub parse {
             prob    => $node->prob,
             wcost   => $node->wcost,
             cost    => $node->cost,
-        };
+        }, 'Text::Shirasu::Node';
     }
 
     return $self;
@@ -113,7 +164,8 @@ sub parse {
 
 =head2 normalize
     
-    $ts->normalize
+    $ts->normalize("あ━ ”（＊）” を〰〰 ’＋１’")
+    $ts->normalize("テキスト〰〰", qw/nfkc, alnum_z2h/, \&your_create_routine)
 
 Lingua::JA::NormalizeText を用いてテキストの正規化を行います.
 =cut
@@ -121,39 +173,8 @@ Lingua::JA::NormalizeText を用いてテキストの正規化を行います.
 sub normalize {
     my $self = shift;
     my $text = shift;
-    my $normalizer = Lingua::JA::NormalizeText->new(@_ || @{$self->{normalize}});
+    my $normalizer = Lingua::JA::NormalizeText->new(@_ ? @_ : @{ $self->{normalize} });
     $normalizer->normalize(utf8::is_utf8($text) ? $text : decode_utf8($text));
-}
-
-=head2 tr
-
-    $ts->tr('，！？' => ',!?');
-
-Perl の tr と同じように parse メソッド実行後にオブジェクト内に保存されている surface の文字列を置換します。
-=cut
-
-sub tr {
-    my $self = shift;
-    my %params = ref $_[0] eq 'HASH' ? 
-        map { utf8::is_utf8($_) ? encode_utf8($_) : $_ } %{$_[0]} :
-        map { utf8::is_utf8($_) ? encode_utf8($_) : $_ } @_;
-
-    my @keys = keys %params;
-
-    if (@keys == 1) {
-        my $key = shift @keys;
-        @keys = map { encode_utf8($_) } split //, decode_utf8($key);
-        my @vals = map { encode_utf8($_) } split //, decode_utf8($params{$key});
-        
-        %params = map { $keys[$_] => $vals[$_] } 0 .. $#keys;
-    }
-
-    my $query = join '|', @keys;
-
-    # replacement
-    $_->{surface} =~ s/($query)/$params{$1}/g for @{ $self->{result} };
-
-    return $self;
 }
 
 =head2 filter
@@ -168,20 +189,21 @@ type をキーに欲しい品詞の情報を渡します。さらにその品詞
 
 sub filter {
     my $self = shift;
-    my %params = ref $_[0] eq 'HASH' ? %{$_[0]} : @_;
+    my %params = ref $_[0] eq 'HASH' ? %{ $_[0] } : @_;
 
-    # and filter
-    my @type = map { utf8::is_utf8($_) ? encode_utf8($_) : $_ } @{ delete $params{type} } 
-                    or croak 'Query has not been inputted: "type"';
+    # and search filter
+    my @type = @{ delete $params{type} }
+        or croak 'Query has not been inputted: "type"';
 
-    # making parameter as /名詞|動詞/ or /名詞/
+    # create parameter as /名詞|動詞/ or /名詞/
     my $query = join '|', @type;
+    $query = encode_utf8($query) if utf8::is_utf8 $query;
 
-    $self->{result} = [ 
+    $self->{nodes} = [
         grep {
             $_->{feature}->[0] =~ /($query)/
-            and _sub_query($_->{feature}->[1], $params{decode_utf8($1)})
-        } @{$self->{result}}
+                and _sub_query( $_->{feature}->[1], $params{$1} )
+        } @{ $self->{nodes} }
     ];
 
     return $self;
@@ -197,19 +219,20 @@ sub filter {
 
 sub join_surface {
     my $self = shift;
-    croak "Does not exist parsed results" unless exists $self->{result};
-    return join '', map { $_->{surface} } @{$self->{result}};
+    croak "Does not exist parsed nodes" unless exists $self->{nodes};
+    return join '', map { $_->{surface} } @{ $self->{nodes} };
 }
 
-=head2 result
+=head2 nodes
     
-    $ts->result
+    $ts->nodes
 
 parse メソッドで入手した情報を格納したデータを返します。
-tr や filter メソッドを利用すると result 内の surface の情報が変化します。  
+tr や filter メソッドを利用すると nodes 内の surface の情報が変化します。  
 
 =cut
-sub result { $_[0]->{result} }
+
+sub nodes { $_[0]->{nodes} }
 
 =head2 mecab
     
@@ -218,42 +241,28 @@ sub result { $_[0]->{result} }
 Text::MeCab のオブジェクトを利用することができます。  
 
 =cut
-sub mecab  { $_[0]->{mecab}  }
 
-=head2 result_dump
+sub mecab { $_[0]->{mecab} }
+
+=head2 nodes_dump
     
-    $ts->result_dump()
+    $ts->nodes_dump(<FH>)
 
-オブジェクト内に保存されている result 内のデータ構造を Data::Dumper を用いて表示します。
+オブジェクト内に保存されている nodes 内のデータ構造を Data::Dumper を用いて表示します。
 
 =cut
 
-sub result_dump {
+sub nodes_dump {
     my $self = shift;
+    my $fh = defined( $_[0] ) && ref( \$_[0] ) eq "GLOB" ? $_[0] : *STDOUT;
     local $Data::Dumper::Sortkeys = 1;
-    $self->_print(Data::Dumper::Dumper($self->{result}) => DEBUG);
+    print {$fh} Data::Dumper::Dumper( $self->{nodes} );
 }
 
-sub _print {
-    my $self = shift;
-    my ($msg, $level) = @_;
-    my $fh = $level && $level >= DEBUG ? *STDERR : *STDOUT;
-    print {$fh} $msg;
-}
-
-# sub routine
-sub _sub_query {
-    my ($subtype, $query) = @_;
-
-    return 1 unless ref $query eq 'ARRAY';
-
-    my $judge = join '|', map { encode_utf8($_) } @$query;
-    
-    return $subtype =~ /$judge/;
-}
-
+# sub routines
 sub normalize_hyphen {
-    local $_ = shift; return undef unless defined $_;
+    local $_ = shift;
+    return undef unless defined $_;
     s/[˗֊‐‑‒–⁃⁻₋−]/-/g;
     s/[﹣－ｰ—―─━ー]/ー/g;
     s/[~∼∾〜〰～]//g;
@@ -268,6 +277,16 @@ sub normalize_symbols {
     $_;
 }
 
+# private
+sub _sub_query {
+    my ( $subtype, $query ) = @_;
+
+    return 1 unless ref $query eq 'ARRAY';
+
+    my $judge = join '|', map { encode_utf8($_) } @$query;
+
+    return $subtype =~ /$judge/;
+}
 
 1;
 
