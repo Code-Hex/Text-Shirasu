@@ -3,19 +3,20 @@ use warnings;
 use Data::Dumper;
 use utf8;
 use v5.10;
+use Encode;
 
 use FindBin;
-BEGIN { push @INC, "$FindBin::Bin/lib"; };
+BEGIN { unshift @INC, "$FindBin::Bin/lib"; };
 
 use Text::Shirasu;
 
-my $mt = Text::Shirasu->new;
-$mt->parse("昨日の晩御飯は，鮭のふりかけと「味噌汁」だけでしたか！？");
-#$mt->print;
+my $ts = Text::Shirasu->new; # this parameter same as Text::MeCab
+my $parse = $ts->parse("昨日の晩御飯は「鮭のふりかけ」と「味噌汁」だけでした。");
 
-print $mt->join_surface."\n\n";
-say $mt->tr('，！？' => ',!?')->join_surface;
+for my $node (@{ $ts->nodes }) {
+    say $node->surface;
+    say Dumper $node->feature;
+}
 
-say $mt->filter(type => [qw/名詞 助動詞 記号/], 記号 => [qw/括弧開 括弧閉/])->join_surface;
-$mt->result_dump;
-
+my $filter = $parse->filter(type => [qw/名詞 助動詞/], 記号 => [qw/括弧開 括弧閉/]);
+say $filter->join_surface;
