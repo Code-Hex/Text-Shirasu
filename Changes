@@ -1,9 +1,11 @@
 Revision history for Perl extension Text-Shirasu
 
 {{$NEXT}}
-	
+
+0.0.2 2016-12-15T15:18:18Z
+
 	- fixed Text::Shirasu::Node
-	- fixed document
+	- fixed Text::Shirasu::Node document
 
 0.0.1 2016-12-15T04:55:20Z
 
