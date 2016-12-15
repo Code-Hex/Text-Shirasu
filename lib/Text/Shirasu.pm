@@ -10,7 +10,7 @@ use Text::Shirasu::Node;
 use Lingua::JA::NormalizeText;
 use Encode qw/encode_utf8 decode_utf8/;
 
-our $VERSION   = "0.0.1";
+our $VERSION   = "0.0.2";
 our @EXPORT_OK = (@Lingua::JA::NormalizeText::EXPORT_OK, qw/normalize_hyphen normalize_symbols/);
 
 *nfkc                 = \&Lingua::JA::NormalizeText::nfkc;
@@ -151,6 +151,7 @@ sub parse {
             feature => [ split /,/, $node->feature ],
             length  => $node->length,
             rlength => $node->rlength,
+            rcattr => $node->rcattr,
             lcattr  => $node->lcattr,
             stat    => $node->stat,
             isbest  => $node->isbest,
