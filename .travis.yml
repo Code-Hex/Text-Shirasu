@@ -1,5 +1,5 @@
 language: perl
-sudo: false
+sudo: true
 perl:
   - "5.12"
   - "5.14"
