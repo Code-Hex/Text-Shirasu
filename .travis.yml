@@ -8,4 +8,4 @@ perl:
   - "5.20"
   - "5.22"
 before_install:
-  - curl https://gist.githubusercontent.com/dtan4/351d031bec0c3d45cd8f/raw/ba93c641e3cb28940bc4c01fe47e7bf3ddd71bff/mecab_install.sh | bash
+  - curl https://gist.githubusercontent.com/ts-3156/fe3328ecbfb096b166f1643fb369ad05/raw/63b9d55bbfbabe876fe4849601946d2bba33f8c8/mecab_install.sh | bash
