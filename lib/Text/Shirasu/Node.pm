@@ -38,6 +38,9 @@ Text::Shirasu::Node like L<Text::MeCab::Node>.
 
 =cut
 
+use strict;
+use warnings;
+
 sub id      { $_[0]->{id}      }
 sub surface { $_[0]->{surface} }
 sub feature { $_[0]->{feature} }
