@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/Code-Hex/Text-Shirasu.svg?branch=master)](https://travis-ci.org/Code-Hex/Text-Shirasu)
+[![Build Status](https://travis-ci.org/Code-Hex/Text-Shirasu.svg?branch=master)](https://travis-ci.org/Code-Hex/Text-Shirasu) [![MetaCPAN Release](https://badge.fury.io/pl/Text-Shirasu.svg)](https://metacpan.org/release/Text-Shirasu)
 # NAME
 
 Text::Shirasu - Text::MeCab wrapped for natural language processing 
