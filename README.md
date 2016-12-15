@@ -1,6 +1,7 @@
+[![Build Status](https://travis-ci.org/Code-Hex/Text-Shirasu.svg?branch=master)](https://travis-ci.org/Code-Hex/Text-Shirasu)
 # NAME
 
-Text::Shirasu - Text::MeCab wrapper
+Text::Shirasu - Text::MeCab wrapped for natural language processing 
 
 # SYNOPSIS
 
@@ -8,71 +9,93 @@ Text::Shirasu - Text::MeCab wrapper
     use feature ':5.10';
     use Text::Shirasu;
     my $ts = Text::Shirasu->new; # this parameter same as Text::MeCab
-    my $parse = $ts->parse("昨日の晩御飯は「鮭のふりかけ」と「味噌汁」だけでした。");
+    my $normalize = $ts->normalize("昨日の晩御飯は「鮭のふりかけ」と「味噌汁」だけでした。");
+    $ts->parse($normalize);
 
-    my $tr = $parse->tr('。' => '.');
-    say $tr->join_surface;
-    
-    my $filter = $parse->filter(type => [qw/名詞 助動詞/], 記号 => [qw/括弧開 括弧閉/]);
+    for my $node (@{ $ts->nodes }) {
+        say $node->surface;
+    }
+
+    say $ts->join_surface;
+
+    my $filter = $ts->filter(type => [qw/名詞 助動詞/], 記号 => [qw/括弧開 括弧閉/]);
     say $filter->join_surface;
 
 # DESCRIPTION
 
 Text::Shirasu is wrapped [Text::MeCab](https://metacpan.org/pod/Text::MeCab).  
-This module has functions filter, replacement, etc...
+This module is easy to normalize text and filter part of speech.
+
+# METHODS
 
 ## parse
 
-    $ts->parse("このおにぎりは「母」が握ってくれたものです。");
+This method wraps the parse method of Text::MeCab.  
+The analysis result is saved as Text::Shirasu::Node instance in the Text::Shirasu instance. So, It will return Text::Shirasu instance.  
 
-Text::MeCab の parse メソッドをラッピングしています。
-parse メソッドは実行結果をオブジェクト内に保存し、オブジェクトを返します。
-用意されている他のメソッドを使用すると結果を上書きして再びオブジェクト内に保存されることに注意してください。
+    $ts->parse("このおにぎりは「母」が握ってくれたものです。");
 
 ## normalize
 
-    $ts->normalize
+It will normalize text using [Lingua::JA::NormalizeText](https://metacpan.org/pod/Lingua::JA::NormalizeText).  
 
-Lingua::JA::NormalizeText を用いてテキストの正規化を行います.
+    $ts->normalize("あ━ ”（＊）” を〰〰 ’＋１’")
+    $ts->normalize("テキスト〰〰", qw/nfkc, alnum_z2h/, \&your_create_routine)
 
-## tr
+It accepts a string as the first argument, and receives the Lingua::JA::NormalizeText options and subroutines after the second argument.
+If you do not specify a subroutine to be used in normalization, use the following Lingua::JA::NormalizeText options and subroutines by default.  
 
-    $ts->tr('，！？' => ',!?');
+Please read the documentation of [Lingua::JA::NormalizeText](https://metacpan.org/pod/Lingua::JA::NormalizeText) for details on how each Lingua::JA::NormalizeText option works.
 
-Perl の tr と同じように parse メソッド実行後にオブジェクト内に保存されている surface の文字列を置換します。
+Lingua::JA::NormalizeText options
+
+`nfkc nfkd nfc nfd alnum_z2h space_z2h katakana_h2z decode_entities unify_nl unify_whitespaces unify_long_spaces trim old2new_kana old2new_kanji tab2space all_dakuon_normalize square2katakana circled2kana circled2kanji decompose_parenthesized_kanji`
+
+Subroutines
+
+`normalize_hyphen normalize_symbols`
 
 ## filter
+
+Please use after parse method execution.   
+Filter the surface based on the features stored in the Text::Shirasu instance.
+Passing subtype to value with part of speech name as key allows you to more filter the string.
 
     $ts->filter(type => [qw/名詞/]);
     $ts->filter(type => [qw/名詞 記号/], 記号 => [qw/括弧開 括弧閉/]);
 
-parse メソッド実行後にオブジェクト内に保存されている surface を feature の情報を利用して条件をもとに絞り込みます。
-type をキーに欲しい品詞の情報を渡します。さらにその品詞の中から細かく絞り込みたい時は、その品詞名をキーにして、細かい情報を渡します。
-
 ## join\_surface
 
-    $ts->join_surface()
+Returns a string that combined the surfaces stored in the instance.
 
-オブジェクト内に保存されている surface を全て結合した文字列を返します。
+    $ts->join_surface
 
-## result
+## nodes
 
-    $ts->result
+Return the array reference of the Text::Shirasu::Node instance.
 
-parse メソッドで入手した情報を格納したデータを返します。
-tr や filter メソッドを利用すると result 内の surface の情報が変化します。  
+    $ts->nodes
 
 ## mecab
 
+Return the Text::MeCab instance.
+
     $ts->mecab
 
-Text::MeCab のオブジェクトを利用することができます。  
+# SUBROUTINES
 
-## result\_dump
+These subroutines perform the following substitution.  
 
-    $ts->result_dump()
+## normalize\_hyphen
 
-オブジェクト内に保存されている result 内のデータ構造を Data::Dumper を用いて表示します。
+    s/[˗֊‐‑‒–⁃⁻₋−]/-/g;
+    s/[﹣－ｰ—―─━ー]/ー/g;
+    s/[~∼∾〜〰～]//g;
+    s/ー+/ー/g;
+
+## normalize\_symbols
+
+    tr/。、・「」/｡､･｢｣/;
 
 # LICENSE
 

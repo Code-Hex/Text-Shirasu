@@ -1,4 +1,4 @@
 name = "Text-Shirasu"
-# badges = ["travis"]
+badges = ["travis"]
+authority="cpan:CODEHEX"
 module_maker="ModuleBuildTiny"
-

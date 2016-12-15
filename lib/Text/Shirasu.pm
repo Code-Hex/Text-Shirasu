@@ -6,7 +6,6 @@ use utf8;
 use Exporter 'import';
 use Text::MeCab;
 use Carp 'croak';
-use Data::Dumper;
 use Text::Shirasu::Node;
 use Lingua::JA::NormalizeText;
 use Encode qw/encode_utf8 decode_utf8/;
