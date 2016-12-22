@@ -215,13 +215,12 @@ sub filter {
         or croak 'Query has not been inputted: "type"';
 
     # create parameter as /名詞|動詞/ or /名詞/
-    my $query = join '|', @type;
-    $query = encode_utf8($query) if utf8::is_utf8 $query;
+    my $query = encode_utf8 join '|', map { $_ } @type;
 
     $self->{nodes} = [
         grep {
             $_->{feature}->[0] =~ /($query)/
-                and _sub_query( $_->{feature}->[1], $params{$1} )
+                and _sub_query( $_->{feature}->[1],  $params{decode_utf8($1)} )
         } @{ $self->{nodes} }
     ];
 

@@ -12,7 +12,7 @@ subtest 'use Shirasu' => sub {
     
     # filter
     my $filter = $ts->filter(type => [qw/名詞 助動詞 記号/], 記号 => [qw/括弧開 括弧閉/])->join_surface;
-    is $filter, encode_utf8("昨日晩御飯，鮭「味噌汁」でした！？"), "Filtering done correctly";
+    is $filter, encode_utf8("昨日晩御飯鮭「味噌汁」でした"), "Filtering done correctly";
 };
 
 subtest 'use Shirasu::Node' => sub {
