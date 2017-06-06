@@ -7,6 +7,7 @@ use Exporter 'import';
 use Text::MeCab;
 use Carp 'croak';
 use Text::Shirasu::Node;
+use Text::Shirasu::CaboChaNode;
 use Lingua::JA::NormalizeText;
 use Encode qw/encode_utf8 decode_utf8/;
 
@@ -121,6 +122,21 @@ sub new {
     } => $class;
 }
 
+sub load_cabocha {
+    my $class = shift;
+    my %args = ref $_[0] eq 'HASH' ? %{ $_[0] } : @_;
+    my $text_cabocha_installed = eval{
+	require Text::CaboCha;
+	1;
+    };
+    if($text_cabocha_installed){
+	$class->{cabocha} = Text::CaboCha->new(%args);
+	$class->{cabocha_nodes} = [];
+    }else{
+	croak "Text::CaboCha has not been installed";
+    }
+}
+
 =head1 METHODS
 =cut
 
@@ -165,6 +181,41 @@ sub parse {
 
     return $self;
 }
+
+sub parse_cabocha {
+    my $self     = shift;
+    my $sentence = $_[0];
+
+    croak "Sentence has not been inputted" unless $sentence;
+    croak "CaboCha has not been loaded" unless exists $self->{cabocha};
+
+    my $ct = $self->{cabocha};
+
+    my $tree = $ct->parse($sentence);
+    my $token_size = $tree->token_size;
+
+    # initialize
+    $self->{cabocha_nodes} = [];
+
+    my $cid=0;
+    for(my $k=0; $k < $token_size; $k++){
+	my $token = $tree->token($k);
+	if($token->chunk){
+	    push @{ $self->{cabocha_nodes} }, bless {
+		cid => $cid++,
+		link => $token->chunk->link,
+		head_pos => $token->chunk->head_pos,
+		func_pos => $token->chunk->func_pos,
+		score => $token->chunk->score,
+	        surface => $token->surface,
+	        feature => [ split /,/, $token->feature ],
+		ne => $token->ne,
+	       }, 'Text::Shirasu::CaboChaNode';
+	}
+    }
+    return $self;
+}
+
 
 =head2 normalize
 
@@ -227,6 +278,30 @@ sub filter {
     return $self;
 }
 
+sub filter_cabocha {
+    my $self = shift;
+    my %params = ref $_[0] eq 'HASH' ? %{ $_[0] } : @_;
+
+    # and search filter
+    my @type = @{ delete $params{type} }
+        or croak 'Query has not been inputted: "type"';
+
+    croak "CaboCha has not been loaded" unless exists $self->{cabocha};
+
+    # create parameter as /名詞|動詞/ or /名詞/
+    my $query = encode_utf8 join '|', map { $_ } @type;
+
+    $self->{cabocha_nodes} = [
+        grep {
+            $_->{feature}->[0] =~ /($query)/
+                and _sub_query( $_->{feature}->[1],  $params{decode_utf8($1)} )
+        } @{ $self->{cabocha_nodes} }
+    ];
+
+    return $self;
+}
+
+
 =head2 join_surface
 
 Returns a string that combined the surfaces stored in the instance.
@@ -241,6 +316,13 @@ sub join_surface {
     return join '', map { $_->{surface} } @{ $self->{nodes} };
 }
 
+sub join_surface_cabocha {
+    my $self = shift;
+    croak "Does not exist parsed nodes" unless exists $self->{cabocha_nodes};
+    return join '', map { $_->{surface} } @{ $self->{cabocha_nodes} };
+}
+
+
 =head2 nodes
 
 Return the array reference of the Text::Shirasu::Node instance.
@@ -250,6 +332,7 @@ Return the array reference of the Text::Shirasu::Node instance.
 =cut
 
 sub nodes { $_[0]->{nodes} }
+sub cabocha_nodes { $_[0]->{cabocha_nodes} }
 
 =head2 mecab
 
@@ -260,6 +343,7 @@ Return the Text::MeCab instance.
 =cut
 
 sub mecab { $_[0]->{mecab} }
+sub cabocha { $_[0]->{cabocha} }
 
 # private
 sub _sub_query {
