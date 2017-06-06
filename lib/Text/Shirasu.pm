@@ -63,7 +63,7 @@ our @EXPORT_OK = (@Lingua::JA::NormalizeText::EXPORT_OK, qw/normalize_hyphen nor
 
 =head1 NAME
 
-Text::Shirasu - Text::MeCab wrapped for natural language processing 
+Text::Shirasu - Text::MeCab, Text::CaboCha wrapped for natural language processing 
 
 =head1 SYNOPSIS
 
@@ -82,6 +82,13 @@ Text::Shirasu - Text::MeCab wrapped for natural language processing
 
     my $filter = $ts->filter(type => [qw/名詞 助動詞/], 記号 => [qw/括弧開 括弧閉/]);
     say $filter->join_surface;
+
+    $ts->load_cabocha(); # This method loads Text::CaboCha object. this parameter same as Text::CaboCha
+
+    $ts->parse_cabocha("今日の晩御飯も「鮭のふりかけ」と「味噌汁」だけでした。");
+    for my $node (@{ $ts->cabocha_nodes }) {
+        say $node->surface;
+    }
 
 =head1 DESCRIPTION
 
@@ -182,6 +189,15 @@ sub parse {
     return $self;
 }
 
+=head2 parse_cabocha
+
+This method wraps the parse method of Text::CaboCha.
+The analysis result is saved as Text::Shirasu::CaboChaNode instance in the Text::Shirasu instance. So, It will return Text::Shirasu instance.  
+
+    $ts->parse_cabocha("このおにぎりも「母」が握ってくれたものです。");
+
+=cut
+
 sub parse_cabocha {
     my $self     = shift;
     my $sentence = $_[0];
@@ -278,6 +294,15 @@ sub filter {
     return $self;
 }
 
+=head2 filter_cabocha
+
+This method filters by POS tag from cabocha_nodes as like filter method.
+
+    $ts->filter_cabocha(type => [qw/名詞/]);
+    $ts->filter_cabocha(type => [qw/名詞 記号/], 記号 => [qw/括弧開 括弧閉/]);
+
+=cut
+
 sub filter_cabocha {
     my $self = shift;
     my %params = ref $_[0] eq 'HASH' ? %{ $_[0] } : @_;
@@ -316,6 +341,14 @@ sub join_surface {
     return join '', map { $_->{surface} } @{ $self->{nodes} };
 }
 
+=head2 join_surface_cabocha
+
+Returns a string that combined the surfaces stored in the instance (cabocha).
+    
+    $ts->join_surface_cabocha
+
+=cut
+
 sub join_surface_cabocha {
     my $self = shift;
     croak "Does not exist parsed nodes" unless exists $self->{cabocha_nodes};
@@ -332,6 +365,15 @@ Return the array reference of the Text::Shirasu::Node instance.
 =cut
 
 sub nodes { $_[0]->{nodes} }
+
+=head2 cabocha_nodes
+
+Return the array reference of the Text::Shirasu::CaboChaNode instance.
+
+    $ts->cabocha_nodes
+
+=cut
+
 sub cabocha_nodes { $_[0]->{cabocha_nodes} }
 
 =head2 mecab
@@ -343,6 +385,15 @@ Return the Text::MeCab instance.
 =cut
 
 sub mecab { $_[0]->{mecab} }
+
+=head2 cabocha
+
+Return the Text::CaboCha instance.
+    
+    $ts->cabocha
+
+=cut
+
 sub cabocha { $_[0]->{cabocha} }
 
 # private
