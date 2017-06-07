@@ -43,7 +43,6 @@
       "runtime" : {
          "requires" : {
             "Lingua::JA::NormalizeText" : "0",
-            "Text::CaboCha" : "0.04",
             "Text::MeCab" : "0"
          }
       },

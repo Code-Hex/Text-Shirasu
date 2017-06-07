@@ -34,15 +34,22 @@ subtest 'use Shirasu::Node' => sub {
 };
 
 subtest 'use Shirasu::Tree' => sub {
-    my $ts = Text::Shirasu->new(cabocha => 1)->parse("昨日の晩御飯は，鮭のふりかけと「味噌汁」だけでしたか！？");
-    my $tree = $ts->trees->[0];
-	ok $tree->can('cid'),      "can not call 'cid' method";
-	ok $tree->can('head_pos'), "can not call 'head_pos' method";
-	ok $tree->can('func_pos'), "can not call 'func_pos' method";
-	ok $tree->can('score'),    "can not call 'score' method";
-	ok $tree->can('surface'),  "can not call 'surface' method";
-	ok $tree->can('feature'),  "can not call 'feature' method";
-	ok $tree->can('ne'),       "can not call 'ne' method";
+    SKIP: {
+        local $@;
+        eval { require Text::CaboCha };
+        if ($@ || $Text::CaboCha::VERSION < "0.04") {
+            skip "If you want to use function of Text::CaboCha, you need to install Text::CaboCha >= 0.04", 10;
+        }
+        my $ts = Text::Shirasu->new(cabocha => 1)->parse("昨日の晩御飯は，鮭のふりかけと「味噌汁」だけでしたか！？");
+        my $tree = $ts->trees->[0];
+        ok $tree->can('cid'),      "can not call 'cid' method";
+        ok $tree->can('head_pos'), "can not call 'head_pos' method";
+        ok $tree->can('func_pos'), "can not call 'func_pos' method";
+        ok $tree->can('score'),    "can not call 'score' method";
+        ok $tree->can('surface'),  "can not call 'surface' method";
+        ok $tree->can('feature'),  "can not call 'feature' method";
+        ok $tree->can('ne'),       "can not call 'ne' method";
+    };
 };
 
 done_testing;

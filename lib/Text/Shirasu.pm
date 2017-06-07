@@ -170,7 +170,11 @@ sub new {
     } => $class;
     
     if ($use_cabocha) {
-        require Text::CaboCha;
+        local $@;
+        eval { require Text::CaboCha };
+        if ($@ || $Text::CaboCha::VERSION < "0.04") {
+            croak("If you want to use function of Text::CaboCha, you need to install Text::CaboCha >= 0.04");
+        }
         for my $opt (qw/rcfile dicdir userdic/) {
             if (exists $args{$opt}) {
                 if ($opt eq 'rcfile') {
