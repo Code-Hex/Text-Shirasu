@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/adokoy001/Text-Shirasu.svg?branch=master)](https://travis-ci.org/adokoy001/Text-Shirasu)
+[![Build Status](https://travis-ci.org/Code-Hex/Text-Shirasu.svg?branch=master)](https://travis-ci.org/Code-Hex/Text-Shirasu) [![MetaCPAN Release](https://badge.fury.io/pl/Text-Shirasu.svg)](https://metacpan.org/release/Text-Shirasu)
 # NAME
 
 Text::Shirasu - Text::MeCab, Text::CaboCha wrapped for natural language processing 
@@ -30,24 +30,45 @@ Text::Shirasu - Text::MeCab, Text::CaboCha wrapped for natural language processi
 
 # DESCRIPTION
 
-Text::Shirasu is wrapped [Text::MeCab](https://metacpan.org/pod/Text::MeCab).  
+Text::Shirasu is wrapped [Text::MeCab](https://metacpan.org/pod/Text::MeCab), [Text::CaboCha](https://metacpan.org/pod/Text::CaboCha).  
 This module is easy to normalize text and filter part of speech.
 
 # METHODS
 
+## new
+    Text::Shirasu->new(
+        # Text::MeCab arguments
+        rcfile             => $rcfile,             # Also it will be ailias as mecabrc for Text::CaboCha
+        dicdir             => $dicdir,             # Also it will be ailias as mecab\_dicdir for Text::CaboCha
+        userdic            => $userdic,            # Also it will be ailias as mecab\_userdic for Text::CaboCha
+        lattice\_level      => $lattice\_level,
+        all\_morphs         => $all\_morphs,
+        output\_format\_type => $output\_format\_type,
+        partial            => $partial,
+        node\_format        => $node\_format,
+        unk\_format         => $unk\_format,
+        bos\_format         => $bos\_format,
+        eos\_format         => $eos\_format,
+        input\_buffer\_size  => $input\_buffer\_size,
+        allocate\_sentence  => $allocate\_sentence,
+        nbest              => $nbest,
+        theta              => $theta,
+
+        # Text::CaboCha arguments
+        ne            => $ne,
+        parser_model  => $parser_model_file,
+        chunker_model => $chunker_model_file,
+        ne_model      => $ne_tagger_model_file,
+    );
+
 ## parse
 
-This method wraps the parse method of Text::MeCab.  
-The analysis result is saved as Text::Shirasu::Node instance in the Text::Shirasu instance. So, It will return Text::Shirasu instance.  
+This method wraps the parse method of Text::MeCab.
+The analysis result is saved as array reference of Text::Shirasu::Node instance in the Text::Shirasu instance.
+Also, If you used cabocha mode, it save as array reference of Text::Shirasu::Tree instance in the Text::Shirasu instance when used this method.
+It return Text::Shirasu instance. 
 
     $ts->parse("このおにぎりは「母」が握ってくれたものです。");
-
-## parse\_cabocha
-
-This method wraps the parse method of Text::CaboCha.
-The analysis result is saved as Text::Shirasu::CaboChaNode instance in the Text::Shirasu instance. So, It will return Text::Shirasu instance.  
-
-    $ts->parse_cabocha("このおにぎりも「母」が握ってくれたものです。");
 
 ## normalize
 
@@ -75,27 +96,23 @@ Please use after parse method execution.
 Filter the surface based on the features stored in the Text::Shirasu instance.
 Passing subtype to value with part of speech name as key allows you to more filter the string.
 
+    # filtering nodes only
     $ts->filter(type => [qw/名詞/]);
     $ts->filter(type => [qw/名詞 記号/], 記号 => [qw/括弧開 括弧閉/]);
 
-## filter\_cabocha
+    # filtering trees only
+    $ts->filter(tree => 1, node => 0, type => [qw/名詞/]);
+    $ts->filter(tree => 1, node => 0, type => [qw/名詞 記号/], 記号 => [qw/括弧開 括弧閉/]);
 
-This method filters by POS tag from cabocha\_nodes as like filter method.
-
-    $ts->filter_cabocha(type => [qw/名詞/]);
-    $ts->filter_cabocha(type => [qw/名詞 記号/], 記号 => [qw/括弧開 括弧閉/]);
+    # filtering nodes and trees
+    $ts->filter(tree => 1, type => [qw/名詞/]);
+    $ts->filter(tree => 1, type => [qw/名詞 記号/], 記号 => [qw/括弧開 括弧閉/]);
 
 ## join\_surface
 
 Returns a string that combined the surfaces stored in the instance.
 
     $ts->join_surface
-
-## join\_surface\_cabocha
-
-Returns a string that combined the surfaces stored in the instance (cabocha).
-
-    $ts->join_surface_cabocha
 
 ## nodes
 
@@ -105,9 +122,9 @@ Return the array reference of the Text::Shirasu::Node instance.
 
 ## cabocha\_nodes
 
-Return the array reference of the Text::Shirasu::CaboChaNode instance.
+Return the array reference of the Text::Shirasu::Tree instance.
 
-    $ts->cabocha_nodes
+    $ts->trees
 
 ## mecab
 

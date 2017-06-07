@@ -93,14 +93,53 @@ Text::Shirasu - Text::MeCab, Text::CaboCha wrapped for natural language processi
 
 =head1 DESCRIPTION
 
-Text::Shirasu is wrapped L<Text::MeCab>.  
+Text::Shirasu is wrapped L<Text::MeCab>, L<Text::CaboCha>.  
 This module is easy to normalize text and filter part of speech.
 
+=cut
+
+=head1 METHODS
+=cut
+=head2 new
+    Text::Shirasu->new(
+        # Text::MeCab arguments
+        rcfile             => $rcfile,             # Also it will be ailias as mecabrc for Text::CaboCha
+        dicdir             => $dicdir,             # Also it will be ailias as mecab_dicdir for Text::CaboCha
+        userdic            => $userdic,            # Also it will be ailias as mecab_userdic for Text::CaboCha
+        lattice_level      => $lattice_level,
+        all_morphs         => $all_morphs,
+        output_format_type => $output_format_type,
+        partial            => $partial,
+        node_format        => $node_format,
+        unk_format         => $unk_format,
+        bos_format         => $bos_format,
+        eos_format         => $eos_format,
+        input_buffer_size  => $input_buffer_size,
+        allocate_sentence  => $allocate_sentence,
+        nbest              => $nbest,
+        theta              => $theta,
+        
+        # Text::CaboCha arguments
+        ne            => $ne,
+        parser_model  => $parser_model_file,
+        chunker_model => $chunker_model_file,
+        ne_model      => $ne_tagger_model_file,
+    );
 =cut
 
 sub new {
     my $class = shift;
     my %args = ref $_[0] eq 'HASH' ? %{ $_[0] } : @_;
+    my %cabocha_opts;
+    my $use_cabocha = delete $args{cabocha};
+    if ($use_cabocha) {
+        for my $opt (qw/ne parser_model chunker_model ne_model/) {
+            if (exists $args{$opt}) {
+                $cabocha_opts{$opt} = delete $args{$opt};
+            }
+        }
+    }
+
     my $self = bless {
         mecab     => Text::MeCab->new(%args),
         nodes     => +[],
@@ -129,17 +168,24 @@ sub new {
         ],
     } => $class;
     
-    if (delete $args{cabocha}) {
+    if ($use_cabocha) {
         require Text::CaboCha;
+        for my $opt (qw/rcfile dicdir userdic/) {
+            if (exists $args{$opt}) {
+                if ($opt eq 'rcfile') {
+                    $cabocha_opts{mecabrc} = $args{$opt};
+                } else {
+                    $cabocha_opts{"mecab_${opt}"} = $args{$opt};
+                }
+            }
+        }
+
         $self->{trees}   = +[];
-        $self->{cabocha} = Text::CaboCha->new;
+        $self->{cabocha} = Text::CaboCha->new(%cabocha_opts);
     }
 
     return $self;
 }
-
-=head1 METHODS
-=cut
 
 =head2 parse
 
@@ -160,7 +206,7 @@ sub parse {
 
     my $mt = $self->{mecab};
 
-    # initializ
+    # initialize
     $self->{nodes} = [];
     my $node = $mt->parse($sentence);
 

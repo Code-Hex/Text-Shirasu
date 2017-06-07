@@ -21,6 +21,7 @@ cover_db/
 *.swp
 *.o
 *.obj
+.vstags
 
 !LICENSE
 

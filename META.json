@@ -4,7 +4,7 @@
       "Kei Kamikawa <x00.x7f@gmail.com>"
    ],
    "dynamic_config" : 0,
-   "generated_by" : "Minilla/v3.0.2, CPAN::Meta::Converter version 2.150001",
+   "generated_by" : "Minilla/v3.0.11, CPAN::Meta::Converter version 2.150005",
    "license" : [
       "perl_5"
    ],
@@ -43,6 +43,7 @@
       "runtime" : {
          "requires" : {
             "Lingua::JA::NormalizeText" : "0",
+            "Text::CaboCha" : "0.04",
             "Text::MeCab" : "0"
          }
       },
@@ -55,18 +56,20 @@
    "release_status" : "unstable",
    "resources" : {
       "bugtracker" : {
-         "web" : "https://github.com/adokoy001/Text-Shirasu/issues"
+         "web" : "https://github.com/Code-Hex/Text-Shirasu/issues"
       },
-      "homepage" : "https://github.com/adokoy001/Text-Shirasu",
+      "homepage" : "https://github.com/Code-Hex/Text-Shirasu",
       "repository" : {
          "type" : "git",
-         "url" : "git://github.com/adokoy001/Text-Shirasu.git",
-         "web" : "https://github.com/adokoy001/Text-Shirasu"
+         "url" : "git://github.com/Code-Hex/Text-Shirasu.git",
+         "web" : "https://github.com/Code-Hex/Text-Shirasu"
       }
    },
    "version" : "0.0.3",
    "x_authority" : "cpan:CODEHEX",
    "x_contributors" : [
-      "Toshiaki Yokoda <adokoy001@gmail.com>"
-   ]
+      "Toshiaki Yokoda <adokoy001@gmail.com>",
+      "K <Code-Hex@users.noreply.github.com>"
+   ],
+   "x_serialization_backend" : "JSON::PP version 2.27300_01"
 }
