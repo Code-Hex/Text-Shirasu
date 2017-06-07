@@ -71,7 +71,7 @@ Text::Shirasu - Text::MeCab, Text::CaboCha wrapped for natural language processi
     use utf8;
     use feature ':5.10';
     use Text::Shirasu;
-    my $ts = Text::Shirasu->new; # this parameter same as Text::MeCab
+    my $ts = Text::Shirasu->new(cabocha => 1); # you can use Text::CaboCha
     my $normalize = $ts->normalize("昨日の晩御飯は「鮭のふりかけ」と「味噌汁」だけでした。");
     $ts->parse($normalize);
 
@@ -84,11 +84,8 @@ Text::Shirasu - Text::MeCab, Text::CaboCha wrapped for natural language processi
     my $filter = $ts->filter(type => [qw/名詞 助動詞/], 記号 => [qw/括弧開 括弧閉/]);
     say $filter->join_surface;
 
-    $ts->load_cabocha(); # This method loads Text::CaboCha object. this parameter same as Text::CaboCha
-
-    $ts->parse_cabocha("今日の晩御飯も「鮭のふりかけ」と「味噌汁」だけでした。");
-    for my $node (@{ $ts->cabocha_nodes }) {
-        say $node->surface;
+    for my $tree (@{ $ts->trees }) {
+        say $tree->surface;
     }
 
 =head1 DESCRIPTION
@@ -101,7 +98,10 @@ This module is easy to normalize text and filter part of speech.
 =head1 METHODS
 =cut
 =head2 new
+
     Text::Shirasu->new(
+        # If you want to use cabocha
+        cabocha => 1,
         # Text::MeCab arguments
         rcfile             => $rcfile,             # Also it will be ailias as mecabrc for Text::CaboCha
         dicdir             => $dicdir,             # Also it will be ailias as mecab_dicdir for Text::CaboCha
@@ -125,6 +125,7 @@ This module is easy to normalize text and filter part of speech.
         chunker_model => $chunker_model_file,
         ne_model      => $ne_tagger_model_file,
     );
+
 =cut
 
 sub new {

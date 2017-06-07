@@ -8,7 +8,7 @@ Text::Shirasu - Text::MeCab, Text::CaboCha wrapped for natural language processi
     use utf8;
     use feature ':5.10';
     use Text::Shirasu;
-    my $ts = Text::Shirasu->new; # this parameter same as Text::MeCab
+    my $ts = Text::Shirasu->new(cabocha => 1); # you can use Text::CaboCha
     my $normalize = $ts->normalize("昨日の晩御飯は「鮭のふりかけ」と「味噌汁」だけでした。");
     $ts->parse($normalize);
 
@@ -21,11 +21,8 @@ Text::Shirasu - Text::MeCab, Text::CaboCha wrapped for natural language processi
     my $filter = $ts->filter(type => [qw/名詞 助動詞/], 記号 => [qw/括弧開 括弧閉/]);
     say $filter->join_surface;
 
-    $ts->load_cabocha(); # This method loads Text::CaboCha object. this parameter same as Text::CaboCha
-
-    $ts->parse_cabocha("今日の晩御飯も「鮭のふりかけ」と「味噌汁」だけでした。");
-    for my $node (@{ $ts->cabocha_nodes }) {
-        say $node->surface;
+    for my $tree (@{ $ts->trees }) {
+        say $tree->surface;
     }
 
 # DESCRIPTION
@@ -36,24 +33,27 @@ This module is easy to normalize text and filter part of speech.
 # METHODS
 
 ## new
+
     Text::Shirasu->new(
+        # If you want to use cabocha
+        cabocha => 1,
         # Text::MeCab arguments
         rcfile             => $rcfile,             # Also it will be ailias as mecabrc for Text::CaboCha
-        dicdir             => $dicdir,             # Also it will be ailias as mecab\_dicdir for Text::CaboCha
-        userdic            => $userdic,            # Also it will be ailias as mecab\_userdic for Text::CaboCha
-        lattice\_level      => $lattice\_level,
-        all\_morphs         => $all\_morphs,
-        output\_format\_type => $output\_format\_type,
+        dicdir             => $dicdir,             # Also it will be ailias as mecab_dicdir for Text::CaboCha
+        userdic            => $userdic,            # Also it will be ailias as mecab_userdic for Text::CaboCha
+        lattice_level      => $lattice_level,
+        all_morphs         => $all_morphs,
+        output_format_type => $output_format_type,
         partial            => $partial,
-        node\_format        => $node\_format,
-        unk\_format         => $unk\_format,
-        bos\_format         => $bos\_format,
-        eos\_format         => $eos\_format,
-        input\_buffer\_size  => $input\_buffer\_size,
-        allocate\_sentence  => $allocate\_sentence,
+        node_format        => $node_format,
+        unk_format         => $unk_format,
+        bos_format         => $bos_format,
+        eos_format         => $eos_format,
+        input_buffer_size  => $input_buffer_size,
+        allocate_sentence  => $allocate_sentence,
         nbest              => $nbest,
         theta              => $theta,
-
+        
         # Text::CaboCha arguments
         ne            => $ne,
         parser_model  => $parser_model_file,

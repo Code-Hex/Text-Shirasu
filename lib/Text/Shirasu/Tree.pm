@@ -4,32 +4,31 @@ package Text::Shirasu::Tree;
 
 =head1 NAME
 
-Text::Shirasu::Tree - Shirasu Node Object for CaboCha
+Text::Shirasu::Tree - Shirasu Tree Object for Text::CaboCha
 
 =head1 SYNOPSIS
 
     use utf8;
     use feature ':5.10';
     use Text::Shirasu;
-    my $ts = Text::Shirasu->new;
-    $ts->load_cabocha;
+    my $ts = Text::Shirasu->new(cabocha => 1);
     
-    $ts->parse_cabocha("昨日の晩御飯は「鮭のふりかけ」と「味噌汁」だけでした。");
+    $ts->parse("昨日の晩御飯は「鮭のふりかけ」と「味噌汁」だけでした。");
 
-    for my $node (@{ $ts->trees }) {
-        say $node->cid;
-        say $node->link;
-        say $node->head_pos;
-        say $node->func_pos;
-        say $node->score;
-        say $node->surface;
-        say for @{ $node->feature };
-        say $node->ne;
+    for my $tree (@{ $ts->trees }) {
+        say $tree->cid;
+        say $tree->link;
+        say $tree->head_pos;
+        say $tree->func_pos;
+        say $tree->score;
+        say $tree->surface;
+        say for @{ $tree->feature };
+        say $tree->ne;
     }
 
 =head1 DESCRIPTION
 
-Text::Shirasu::CaboChaNode like L<Text::CaboCha::Token>.
+Text::Shirasu::Tree like L<Text::CaboCha::Token>, L<Text::CaboCha::Chunk>.
 
 =cut
 
