@@ -33,4 +33,22 @@ subtest 'use Shirasu::Node' => sub {
     ok $node->can('cost'),    "can call 'cost' method";
 };
 
+subtest 'use CaboCha' => sub {
+    my $ts = Text::Shirasu->new;
+  SKIP: {
+	eval{require Text::CaboCha};
+	skip "Text::CaboCha not installed", 10 if $@;
+	ok $ts->load_cabocha, "load_cabocha OK.";
+	ok $ts->parse_cabocha("昨日の晩御飯は，鮭のふりかけと「味噌汁」だけでしたか！？"), "parse_cabocha OK.";
+	ok my $node = $ts->cabocha_nodes->[0], "cabocha_nodes OK.";
+	ok $node->can('cid'),      "can call 'cid' method";
+	ok $node->can('head_pos'), "can call 'head_pos' method";
+	ok $node->can('func_pos'), "can call 'func_pos' method";
+	ok $node->can('score'),    "can call 'score' method";
+	ok $node->can('surface'),  "can call 'surface' method";
+	ok $node->can('feature'),  "can call 'feature' method";
+	ok $node->can('ne'),       "can call 'ne' method";
+    }
+};
+
 done_testing;

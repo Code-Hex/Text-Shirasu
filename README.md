@@ -1,7 +1,7 @@
-[![Build Status](https://travis-ci.org/Code-Hex/Text-Shirasu.svg?branch=master)](https://travis-ci.org/Code-Hex/Text-Shirasu) [![MetaCPAN Release](https://badge.fury.io/pl/Text-Shirasu.svg)](https://metacpan.org/release/Text-Shirasu)
+[![Build Status](https://travis-ci.org/adokoy001/Text-Shirasu.svg?branch=master)](https://travis-ci.org/adokoy001/Text-Shirasu)
 # NAME
 
-Text::Shirasu - Text::MeCab wrapped for natural language processing 
+Text::Shirasu - Text::MeCab, Text::CaboCha wrapped for natural language processing 
 
 # SYNOPSIS
 
@@ -21,6 +21,13 @@ Text::Shirasu - Text::MeCab wrapped for natural language processing
     my $filter = $ts->filter(type => [qw/名詞 助動詞/], 記号 => [qw/括弧開 括弧閉/]);
     say $filter->join_surface;
 
+    $ts->load_cabocha(); # This method loads Text::CaboCha object. this parameter same as Text::CaboCha
+
+    $ts->parse_cabocha("今日の晩御飯も「鮭のふりかけ」と「味噌汁」だけでした。");
+    for my $node (@{ $ts->cabocha_nodes }) {
+        say $node->surface;
+    }
+
 # DESCRIPTION
 
 Text::Shirasu is wrapped [Text::MeCab](https://metacpan.org/pod/Text::MeCab).  
@@ -34,6 +41,13 @@ This method wraps the parse method of Text::MeCab.
 The analysis result is saved as Text::Shirasu::Node instance in the Text::Shirasu instance. So, It will return Text::Shirasu instance.  
 
     $ts->parse("このおにぎりは「母」が握ってくれたものです。");
+
+## parse\_cabocha
+
+This method wraps the parse method of Text::CaboCha.
+The analysis result is saved as Text::Shirasu::CaboChaNode instance in the Text::Shirasu instance. So, It will return Text::Shirasu instance.  
+
+    $ts->parse_cabocha("このおにぎりも「母」が握ってくれたものです。");
 
 ## normalize
 
@@ -64,11 +78,24 @@ Passing subtype to value with part of speech name as key allows you to more filt
     $ts->filter(type => [qw/名詞/]);
     $ts->filter(type => [qw/名詞 記号/], 記号 => [qw/括弧開 括弧閉/]);
 
+## filter\_cabocha
+
+This method filters by POS tag from cabocha\_nodes as like filter method.
+
+    $ts->filter_cabocha(type => [qw/名詞/]);
+    $ts->filter_cabocha(type => [qw/名詞 記号/], 記号 => [qw/括弧開 括弧閉/]);
+
 ## join\_surface
 
 Returns a string that combined the surfaces stored in the instance.
 
     $ts->join_surface
+
+## join\_surface\_cabocha
+
+Returns a string that combined the surfaces stored in the instance (cabocha).
+
+    $ts->join_surface_cabocha
 
 ## nodes
 
@@ -76,11 +103,23 @@ Return the array reference of the Text::Shirasu::Node instance.
 
     $ts->nodes
 
+## cabocha\_nodes
+
+Return the array reference of the Text::Shirasu::CaboChaNode instance.
+
+    $ts->cabocha_nodes
+
 ## mecab
 
 Return the Text::MeCab instance.
 
     $ts->mecab
+
+## cabocha
+
+Return the Text::CaboCha instance.
+
+    $ts->cabocha
 
 # SUBROUTINES
 
