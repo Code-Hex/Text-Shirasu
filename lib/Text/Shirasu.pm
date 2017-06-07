@@ -362,7 +362,7 @@ Return the array reference of the Text::Shirasu::Node instance.
 
 sub nodes { $_[0]->{nodes} }
 
-=head2 cabocha_nodes
+=head2 trees
 
 Return the array reference of the Text::Shirasu::Tree instance.
 

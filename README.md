@@ -120,7 +120,7 @@ Return the array reference of the Text::Shirasu::Node instance.
 
     $ts->nodes
 
-## cabocha\_nodes
+## trees
 
 Return the array reference of the Text::Shirasu::Tree instance.
 
