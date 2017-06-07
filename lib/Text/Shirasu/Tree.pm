@@ -1,10 +1,10 @@
-package Text::Shirasu::CaboChaNode;
+package Text::Shirasu::Tree;
 
 =encoding utf-8
 
 =head1 NAME
 
-Text::Shirasu::CaboChaNode - Shirasu Node Object for CaboCha
+Text::Shirasu::Tree - Shirasu Node Object for CaboCha
 
 =head1 SYNOPSIS
 
@@ -16,7 +16,7 @@ Text::Shirasu::CaboChaNode - Shirasu Node Object for CaboCha
     
     $ts->parse_cabocha("昨日の晩御飯は「鮭のふりかけ」と「味噌汁」だけでした。");
 
-    for my $node (@{ $ts->cabocha_nodes }) {
+    for my $node (@{ $ts->trees }) {
         say $node->cid;
         say $node->link;
         say $node->head_pos;

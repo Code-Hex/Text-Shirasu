@@ -3,11 +3,12 @@ package Text::Shirasu;
 use strict;
 use warnings;
 use utf8;
+
 use Exporter 'import';
 use Text::MeCab;
 use Carp 'croak';
 use Text::Shirasu::Node;
-use Text::Shirasu::CaboChaNode;
+use Text::Shirasu::Tree;
 use Lingua::JA::NormalizeText;
 use Encode qw/encode_utf8 decode_utf8/;
 
@@ -100,7 +101,7 @@ This module is easy to normalize text and filter part of speech.
 sub new {
     my $class = shift;
     my %args = ref $_[0] eq 'HASH' ? %{ $_[0] } : @_;
-    return bless {
+    my $self = bless {
         mecab     => Text::MeCab->new(%args),
         nodes     => +[],
         normalize => +[qw/
@@ -127,21 +128,14 @@ sub new {
             /, \&normalize_hyphen, \&normalize_symbols
         ],
     } => $class;
-}
-
-sub load_cabocha {
-    my $class = shift;
-    my %args = ref $_[0] eq 'HASH' ? %{ $_[0] } : @_;
-    my $text_cabocha_installed = eval{
-	require Text::CaboCha;
-	1;
-    };
-    if($text_cabocha_installed){
-	$class->{cabocha} = Text::CaboCha->new(%args);
-	$class->{cabocha_nodes} = [];
-    }else{
-	croak "Text::CaboCha has not been installed";
+    
+    if (delete $args{cabocha}) {
+        require Text::CaboCha;
+        $self->{trees}   = +[];
+        $self->{cabocha} = Text::CaboCha->new;
     }
+
+    return $self;
 }
 
 =head1 METHODS
@@ -149,8 +143,10 @@ sub load_cabocha {
 
 =head2 parse
 
-This method wraps the parse method of Text::MeCab.  
-The analysis result is saved as Text::Shirasu::Node instance in the Text::Shirasu instance. So, It will return Text::Shirasu instance.  
+This method wraps the parse method of Text::MeCab.
+The analysis result is saved as array reference of Text::Shirasu::Node instance in the Text::Shirasu instance.
+Also, If you used cabocha mode, it save as array reference of Text::Shirasu::Tree instance in the Text::Shirasu instance when used this method.
+It return Text::Shirasu instance. 
 
     $ts->parse("このおにぎりは「母」が握ってくれたものです。");
 
@@ -164,17 +160,39 @@ sub parse {
 
     my $mt = $self->{mecab};
 
-    # initialize
+    # initializ
     $self->{nodes} = [];
+    my $node = $mt->parse($sentence);
 
-    for (my $node = $mt->parse($sentence); $node && $node->surface; $node = $node->next) {
+    # when cabocha mode
+    if (exists $self->{cabocha}) {
+        my $ct   = $self->{cabocha};
+        my $tree = $ct->parse_from_node($node);
+        my $cid = 0;
+        for my $token (@{ $tree->tokens }) {
+            if ($token->chunk) {
+                push @{ $self->{trees} }, bless {
+                    cid      => $cid++,
+                    link     => $token->chunk->link,
+                    head_pos => $token->chunk->head_pos,
+                    func_pos => $token->chunk->func_pos,
+                    score    => $token->chunk->score,
+                    surface  => $token->surface,
+                    feature  => [ split /,/, $token->feature ],
+                    ne       => $token->ne,
+                }, 'Text::Shirasu::Tree';
+            }
+        }
+    }
+
+    for (; $node && $node->surface; $node = $node->next) {
         push @{ $self->{nodes} }, bless {
             id      => $node->id,
             surface => $node->surface,
             feature => [ split /,/, $node->feature ],
             length  => $node->length,
             rlength => $node->rlength,
-            rcattr => $node->rcattr,
+            rcattr  => $node->rcattr,
             lcattr  => $node->lcattr,
             stat    => $node->stat,
             isbest  => $node->isbest,
@@ -188,50 +206,6 @@ sub parse {
 
     return $self;
 }
-
-=head2 parse_cabocha
-
-This method wraps the parse method of Text::CaboCha.
-The analysis result is saved as Text::Shirasu::CaboChaNode instance in the Text::Shirasu instance. So, It will return Text::Shirasu instance.  
-
-    $ts->parse_cabocha("このおにぎりも「母」が握ってくれたものです。");
-
-=cut
-
-sub parse_cabocha {
-    my $self     = shift;
-    my $sentence = $_[0];
-
-    croak "Sentence has not been inputted" unless $sentence;
-    croak "CaboCha has not been loaded" unless exists $self->{cabocha};
-
-    my $ct = $self->{cabocha};
-
-    my $tree = $ct->parse($sentence);
-    my $token_size = $tree->token_size;
-
-    # initialize
-    $self->{cabocha_nodes} = [];
-
-    my $cid=0;
-    for(my $k=0; $k < $token_size; $k++){
-	my $token = $tree->token($k);
-	if($token->chunk){
-	    push @{ $self->{cabocha_nodes} }, bless {
-		cid => $cid++,
-		link => $token->chunk->link,
-		head_pos => $token->chunk->head_pos,
-		func_pos => $token->chunk->func_pos,
-		score => $token->chunk->score,
-	        surface => $token->surface,
-	        feature => [ split /,/, $token->feature ],
-		ne => $token->ne,
-	       }, 'Text::Shirasu::CaboChaNode';
-	}
-    }
-    return $self;
-}
-
 
 =head2 normalize
 
@@ -268,8 +242,17 @@ Please use after parse method execution.
 Filter the surface based on the features stored in the Text::Shirasu instance.
 Passing subtype to value with part of speech name as key allows you to more filter the string.
 
+    # filtering nodes only
     $ts->filter(type => [qw/名詞/]);
     $ts->filter(type => [qw/名詞 記号/], 記号 => [qw/括弧開 括弧閉/]);
+
+    # filtering trees only
+    $ts->filter(tree => 1, node => 0, type => [qw/名詞/]);
+    $ts->filter(tree => 1, node => 0, type => [qw/名詞 記号/], 記号 => [qw/括弧開 括弧閉/]);
+
+    # filtering nodes and trees
+    $ts->filter(tree => 1, type => [qw/名詞/]);
+    $ts->filter(tree => 1, type => [qw/名詞 記号/], 記号 => [qw/括弧開 括弧閉/]);
 
 =cut
 
@@ -284,44 +267,25 @@ sub filter {
     # create parameter as /名詞|動詞/ or /名詞/
     my $query = encode_utf8 join '|', map { $_ } @type;
 
-    $self->{nodes} = [
-        grep {
-            $_->{feature}->[0] =~ /($query)/
-                and _sub_query( $_->{feature}->[1],  $params{decode_utf8($1)} )
-        } @{ $self->{nodes} }
-    ];
+    # filtering trees
+    if (delete $params{tree}) {
+        $self->{trees} = [
+            grep {
+                $_->{feature}->[0] =~ /($query)/
+                    and _sub_query( $_->{feature}->[1],  $params{decode_utf8($1)} )
+            } @{ $self->{trees} }
+        ];
+    }
 
-    return $self;
-}
-
-=head2 filter_cabocha
-
-This method filters by POS tag from cabocha_nodes as like filter method.
-
-    $ts->filter_cabocha(type => [qw/名詞/]);
-    $ts->filter_cabocha(type => [qw/名詞 記号/], 記号 => [qw/括弧開 括弧閉/]);
-
-=cut
-
-sub filter_cabocha {
-    my $self = shift;
-    my %params = ref $_[0] eq 'HASH' ? %{ $_[0] } : @_;
-
-    # and search filter
-    my @type = @{ delete $params{type} }
-        or croak 'Query has not been inputted: "type"';
-
-    croak "CaboCha has not been loaded" unless exists $self->{cabocha};
-
-    # create parameter as /名詞|動詞/ or /名詞/
-    my $query = encode_utf8 join '|', map { $_ } @type;
-
-    $self->{cabocha_nodes} = [
-        grep {
-            $_->{feature}->[0] =~ /($query)/
-                and _sub_query( $_->{feature}->[1],  $params{decode_utf8($1)} )
-        } @{ $self->{cabocha_nodes} }
-    ];
+    # filtering nodes if unset "node" argument or "node => true value"
+    if (!exists $params{node} || delete $params{node}) {
+        $self->{nodes} = [
+            grep {
+                $_->{feature}->[0] =~ /($query)/
+                    and _sub_query( $_->{feature}->[1],  $params{decode_utf8($1)} )
+            } @{ $self->{nodes} }
+        ];
+    }
 
     return $self;
 }
@@ -341,21 +305,6 @@ sub join_surface {
     return join '', map { $_->{surface} } @{ $self->{nodes} };
 }
 
-=head2 join_surface_cabocha
-
-Returns a string that combined the surfaces stored in the instance (cabocha).
-    
-    $ts->join_surface_cabocha
-
-=cut
-
-sub join_surface_cabocha {
-    my $self = shift;
-    croak "Does not exist parsed nodes" unless exists $self->{cabocha_nodes};
-    return join '', map { $_->{surface} } @{ $self->{cabocha_nodes} };
-}
-
-
 =head2 nodes
 
 Return the array reference of the Text::Shirasu::Node instance.
@@ -368,13 +317,13 @@ sub nodes { $_[0]->{nodes} }
 
 =head2 cabocha_nodes
 
-Return the array reference of the Text::Shirasu::CaboChaNode instance.
+Return the array reference of the Text::Shirasu::Tree instance.
 
-    $ts->cabocha_nodes
+    $ts->trees
 
 =cut
 
-sub cabocha_nodes { $_[0]->{cabocha_nodes} }
+sub trees { $_[0]->{trees} }
 
 =head2 mecab
 
