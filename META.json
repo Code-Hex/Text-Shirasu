@@ -1,5 +1,5 @@
 {
-   "abstract" : "Text::MeCab, Text::CaboCha wrapped for natural language processing ",
+   "abstract" : "Text::MeCab wrapped for natural language processing ",
    "author" : [
       "Kei Kamikawa <x00.x7f@gmail.com>"
    ],

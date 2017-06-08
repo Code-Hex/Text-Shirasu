@@ -1,5 +1,5 @@
 language: perl
-sudo: true
+sudo: required
 perl:
   - "5.12"
   - "5.14"
@@ -8,4 +8,4 @@ perl:
   - "5.20"
   - "5.22"
 before_install:
-  - curl https://gist.githubusercontent.com/ts-3156/fe3328ecbfb096b166f1643fb369ad05/raw/63b9d55bbfbabe876fe4849601946d2bba33f8c8/mecab_install.sh | bash && curl https://gist.githubusercontent.com/Code-Hex/86441656d3d8f23731adbf167aeb1b72/raw/2883bf103dee1cdc378dd66e3e644e1d373144a9/cabocha_install.sh | bash
+  - curl https://gist.githubusercontent.com/ts-3156/fe3328ecbfb096b166f1643fb369ad05/raw/63b9d55bbfbabe876fe4849601946d2bba33f8c8/mecab_install.sh | bash && curl https://gist.githubusercontent.com/Code-Hex/86441656d3d8f23731adbf167aeb1b72/raw/d35fd340ed33bbbb3ee801d37067eca4e591880b/cabocha_install.sh | bash && cpanm Text::CaboCha

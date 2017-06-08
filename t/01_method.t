@@ -38,7 +38,7 @@ subtest 'use Shirasu::Tree' => sub {
         local $@;
         eval { require Text::CaboCha };
         if ($@ || $Text::CaboCha::VERSION < "0.04") {
-            skip "If you want to use function of Text::CaboCha, you need to install Text::CaboCha >= 0.04", 10;
+            skip "If you want to use some functions of Text::CaboCha, you need to install Text::CaboCha >= 0.04", 10;
         }
         my $ts = Text::Shirasu->new(cabocha => 1)->parse("昨日の晩御飯は，鮭のふりかけと「味噌汁」だけでしたか！？");
         my $tree = $ts->trees->[0];

@@ -64,7 +64,7 @@ our @EXPORT_OK = (@Lingua::JA::NormalizeText::EXPORT_OK, qw/normalize_hyphen nor
 
 =head1 NAME
 
-Text::Shirasu - Text::MeCab, Text::CaboCha wrapped for natural language processing 
+Text::Shirasu - Text::MeCab wrapped for natural language processing 
 
 =head1 SYNOPSIS
 
@@ -90,8 +90,9 @@ Text::Shirasu - Text::MeCab, Text::CaboCha wrapped for natural language processi
 
 =head1 DESCRIPTION
 
-Text::Shirasu is wrapped L<Text::MeCab>, L<Text::CaboCha>.  
-This module is easy to normalize text and filter part of speech.
+Text::Shirasu is wrapped L<Text::MeCab>.  
+This module is easy to normalize text and filter part of speech.  
+Also to use L<Text::CaboCha> by setting the cabocha option to true.
 
 =cut
 
@@ -134,9 +135,25 @@ sub new {
     my %cabocha_opts;
     my $use_cabocha = delete $args{cabocha};
     if ($use_cabocha) {
+        local $@;
+        eval { require Text::CaboCha };
+        if ($@ || $Text::CaboCha::VERSION < "0.04") {
+            croak("If you want to use some functions of Text::CaboCha, you need to install Text::CaboCha >= 0.04");
+        }
+        # Arguments for Text::Cabocha
         for my $opt (qw/ne parser_model chunker_model ne_model/) {
             if (exists $args{$opt}) {
                 $cabocha_opts{$opt} = delete $args{$opt};
+            }
+        }
+        # Get from arguments of Text::MeCab
+        for my $opt (qw/rcfile dicdir userdic/) {
+            if (exists $args{$opt}) {
+                if ($opt eq 'rcfile') {
+                    $cabocha_opts{mecabrc} = $args{$opt};
+                } else {
+                    $cabocha_opts{"mecab_${opt}"} = $args{$opt};
+                }
             }
         }
     }
@@ -170,21 +187,6 @@ sub new {
     } => $class;
     
     if ($use_cabocha) {
-        local $@;
-        eval { require Text::CaboCha };
-        if ($@ || $Text::CaboCha::VERSION < "0.04") {
-            croak("If you want to use function of Text::CaboCha, you need to install Text::CaboCha >= 0.04");
-        }
-        for my $opt (qw/rcfile dicdir userdic/) {
-            if (exists $args{$opt}) {
-                if ($opt eq 'rcfile') {
-                    $cabocha_opts{mecabrc} = $args{$opt};
-                } else {
-                    $cabocha_opts{"mecab_${opt}"} = $args{$opt};
-                }
-            }
-        }
-
         $self->{trees}   = +[];
         $self->{cabocha} = Text::CaboCha->new(%cabocha_opts);
     }

@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/Code-Hex/Text-Shirasu.svg?branch=master)](https://travis-ci.org/Code-Hex/Text-Shirasu) [![MetaCPAN Release](https://badge.fury.io/pl/Text-Shirasu.svg)](https://metacpan.org/release/Text-Shirasu)
 # NAME
 
-Text::Shirasu - Text::MeCab, Text::CaboCha wrapped for natural language processing 
+Text::Shirasu - Text::MeCab wrapped for natural language processing 
 
 # SYNOPSIS
 
@@ -27,8 +27,9 @@ Text::Shirasu - Text::MeCab, Text::CaboCha wrapped for natural language processi
 
 # DESCRIPTION
 
-Text::Shirasu is wrapped [Text::MeCab](https://metacpan.org/pod/Text::MeCab), [Text::CaboCha](https://metacpan.org/pod/Text::CaboCha).  
-This module is easy to normalize text and filter part of speech.
+Text::Shirasu is wrapped [Text::MeCab](https://metacpan.org/pod/Text::MeCab).  
+This module is easy to normalize text and filter part of speech.  
+Also to use [Text::CaboCha](https://metacpan.org/pod/Text::CaboCha) by setting the cabocha option to true.
 
 # METHODS
 
