@@ -12,7 +12,7 @@ use Text::Shirasu::Tree;
 use Lingua::JA::NormalizeText;
 use Encode qw/encode_utf8 decode_utf8/;
 
-our $VERSION   = "0.0.3";
+our $VERSION   = "0.0.4";
 our @EXPORT_OK = (@Lingua::JA::NormalizeText::EXPORT_OK, qw/normalize_hyphen normalize_symbols/);
 
 *nfkc                 = \&Lingua::JA::NormalizeText::nfkc;

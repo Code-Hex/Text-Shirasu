@@ -64,11 +64,12 @@
          "web" : "https://github.com/Code-Hex/Text-Shirasu"
       }
    },
-   "version" : "0.0.3",
+   "version" : "0.0.4",
    "x_authority" : "cpan:CODEHEX",
    "x_contributors" : [
       "Toshiaki Yokoda <adokoy001@gmail.com>",
       "K <Code-Hex@users.noreply.github.com>"
    ],
-   "x_serialization_backend" : "JSON::PP version 2.27300_01"
+   "x_serialization_backend" : "JSON::PP version 2.27300_01",
+   "x_static_install" : 1
 }
