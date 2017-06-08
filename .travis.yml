@@ -8,4 +8,7 @@ perl:
   - "5.20"
   - "5.22"
 before_install:
-  - curl https://gist.githubusercontent.com/ts-3156/fe3328ecbfb096b166f1643fb369ad05/raw/63b9d55bbfbabe876fe4849601946d2bba33f8c8/mecab_install.sh | bash && curl https://gist.githubusercontent.com/Code-Hex/86441656d3d8f23731adbf167aeb1b72/raw/d35fd340ed33bbbb3ee801d37067eca4e591880b/cabocha_install.sh | bash && cpanm Text::CaboCha
+  - curl https://gist.githubusercontent.com/ts-3156/fe3328ecbfb096b166f1643fb369ad05/raw/63b9d55bbfbabe876fe4849601946d2bba33f8c8/mecab_install.sh | bash
+  - curl https://gist.githubusercontent.com/Code-Hex/86441656d3d8f23731adbf167aeb1b72/raw/0a28ec52dda116a2a60c29c5df7a258d14b1f35d/cabocha_install.sh | bash
+  - cpanm Text::MeCab || cat ~/.cpanm/build.log
+  - cpanm Text::CaboCha || cat ~/.cpanm/build.log
